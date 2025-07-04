@@ -3,6 +3,7 @@ import { Users, Truck, Clock, AlertTriangle, Bell, TruckIcon, FileText, Download
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import StatsCard from './StatsCard';
 import FilterPanel from './FilterPanel';
+import DocumentReport from './DocumentReport';
 import Button from '../Common/Button';
 import { DashboardStats, Driver, Vehicle, DocumentStatus } from '../../types';
 import { formatDate, getDaysUntilExpiry, getStatusText, getDocumentTypeLabel } from '../../utils/documentHelpers';
@@ -330,6 +331,9 @@ const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Document Report Table */}
+      <DocumentReport drivers={drivers} vehicles={vehicles} />
 
       {/* Vehicle Details Modal/Section */}
       {selectedVehicleType && (
