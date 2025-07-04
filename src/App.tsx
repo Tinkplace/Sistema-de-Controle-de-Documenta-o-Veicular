@@ -4,6 +4,7 @@ import Dashboard from './components/Dashboard/Dashboard';
 import DriverList from './components/Drivers/DriverList';
 import VehicleList from './components/Vehicles/VehicleList';
 import NotificationList from './components/Notifications/NotificationList';
+import DocumentFilter from './components/DocumentFilter/DocumentFilter';
 import Modal from './components/Common/Modal';
 import DriverForm from './components/Forms/DriverForm';
 import VehicleForm from './components/Forms/VehicleForm';
@@ -127,6 +128,13 @@ function App() {
           <NotificationList
             notifications={notifications}
             onSendNotification={sendNotification}
+          />
+        );
+      case 'document-filter':
+        return (
+          <DocumentFilter
+            drivers={drivers}
+            vehicles={vehicles}
           />
         );
       default:

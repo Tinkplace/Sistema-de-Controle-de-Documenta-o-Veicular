@@ -1,5 +1,5 @@
 import React from 'react';
-import { Truck, Bell, Settings, User } from 'lucide-react';
+import { Truck, Bell, Settings, User, Filter } from 'lucide-react';
 
 interface HeaderProps {
   activeTab: string;
@@ -12,6 +12,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange, notificationCou
     { id: 'dashboard', label: 'Dashboard', icon: Truck },
     { id: 'drivers', label: 'Motoristas', icon: User },
     { id: 'vehicles', label: 'Veículos', icon: Truck },
+    { id: 'document-filter', label: 'Filtro de Documentos', icon: Filter },
     { id: 'notifications', label: 'Notificações', icon: Bell }
   ];
 
