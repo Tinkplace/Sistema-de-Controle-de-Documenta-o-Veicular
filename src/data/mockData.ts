@@ -7,6 +7,8 @@ export const mockDrivers: Driver[] = [
     name: 'João Silva Santos',
     email: 'joao.silva@email.com',
     phone: '(11) 99999-1111',
+    cavaloPlate: 'ABC-1234',
+    carretaPlate: 'DEF-5678',
     createdAt: '2024-01-15T00:00:00Z',
     documents: [
       {
@@ -49,6 +51,7 @@ export const mockDrivers: Driver[] = [
     name: 'Maria Oliveira Costa',
     email: 'maria.oliveira@email.com',
     phone: '(11) 99999-2222',
+    cavaloPlate: 'GHI-9012',
     createdAt: '2024-02-10T00:00:00Z',
     documents: [
       {

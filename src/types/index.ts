@@ -3,6 +3,8 @@ export interface Driver {
   name: string;
   email: string;
   phone: string;
+  cavaloPlate?: string;
+  carretaPlate?: string;
   createdAt: string;
   documents: DriverDocument[];
 }

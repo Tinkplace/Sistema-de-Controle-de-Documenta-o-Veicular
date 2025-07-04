@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Mail, Phone, Save, X, FileText, Calendar, CreditCard } from 'lucide-react';
+import { User, Mail, Phone, Save, X, FileText, Calendar, CreditCard, Truck } from 'lucide-react';
 import { Driver, DriverDocument } from '../../types';
 import Button from '../Common/Button';
 import { getDocumentStatus } from '../../utils/documentHelpers';
@@ -20,7 +20,9 @@ const DriverForm: React.FC<DriverFormProps> = ({
   const [formData, setFormData] = useState({
     name: driver?.name || '',
     email: driver?.email || '',
-    phone: driver?.phone || ''
+    phone: driver?.phone || '',
+    cavaloPlate: driver?.cavaloPlate || '',
+    carretaPlate: driver?.carretaPlate || ''
   });
 
   const [documents, setDocuments] = useState({
@@ -62,6 +64,15 @@ const DriverForm: React.FC<DriverFormProps> = ({
       newErrors.phone = 'Telefone é obrigatório';
     } else if (!/^\(\d{2}\)\s\d{4,5}-\d{4}$/.test(formData.phone)) {
       newErrors.phone = 'Formato: (11) 99999-9999';
+    }
+
+    // Validação placas (opcionais, mas se preenchidas devem estar no formato correto)
+    if (formData.cavaloPlate && !/^[A-Z]{3}-\d{4}$/.test(formData.cavaloPlate.toUpperCase())) {
+      newErrors.cavaloPlate = 'Formato: ABC-1234';
+    }
+
+    if (formData.carretaPlate && !/^[A-Z]{3}-\d{4}$/.test(formData.carretaPlate.toUpperCase())) {
+      newErrors.carretaPlate = 'Formato: ABC-1234';
     }
 
     // Validação CNH
@@ -123,6 +134,8 @@ const DriverForm: React.FC<DriverFormProps> = ({
 
       onSave({
         ...formData,
+        cavaloPlate: formData.cavaloPlate.toUpperCase(),
+        carretaPlate: formData.carretaPlate.toUpperCase(),
         documents: driverDocuments
       });
     }
@@ -145,6 +158,22 @@ const DriverForm: React.FC<DriverFormProps> = ({
     }
     
     setFormData(prev => ({ ...prev, phone: formatted }));
+  };
+
+  const handlePlateChange = (field: 'cavaloPlate' | 'carretaPlate', value: string) => {
+    const clean = value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    
+    let formatted = '';
+    if (clean.length >= 3) {
+      formatted = clean.slice(0, 3);
+      if (clean.length >= 4) {
+        formatted += '-' + clean.slice(3, 7);
+      }
+    } else {
+      formatted = clean;
+    }
+    
+    setFormData(prev => ({ ...prev, [field]: formatted }));
   };
 
   const handleCnhNumberChange = (value: string) => {
@@ -238,6 +267,66 @@ const DriverForm: React.FC<DriverFormProps> = ({
                 <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
               )}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Veículos Associados */}
+      <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
+        <h3 className="text-lg font-semibold text-blue-900 mb-4 flex items-center">
+          <Truck className="h-5 w-5 mr-2" />
+          Veículos Associados
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Placa do Cavalo */}
+          <div>
+            <label htmlFor="cavaloPlate" className="block text-sm font-medium text-gray-700 mb-2">
+              <Truck className="h-4 w-4 inline mr-1" />
+              Placa do Cavalo Mecânico
+            </label>
+            <input
+              type="text"
+              id="cavaloPlate"
+              value={formData.cavaloPlate}
+              onChange={(e) => handlePlateChange('cavaloPlate', e.target.value)}
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.cavaloPlate ? 'border-red-300' : 'border-gray-300'
+              }`}
+              placeholder="ABC-1234"
+              maxLength={8}
+            />
+            {errors.cavaloPlate && (
+              <p className="mt-1 text-sm text-red-600">{errors.cavaloPlate}</p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+              Opcional - Informe a placa do cavalo mecânico que este motorista utiliza
+            </p>
+          </div>
+
+          {/* Placa da Carreta */}
+          <div>
+            <label htmlFor="carretaPlate" className="block text-sm font-medium text-gray-700 mb-2">
+              <Truck className="h-4 w-4 inline mr-1" />
+              Placa da Carreta/Reboque
+            </label>
+            <input
+              type="text"
+              id="carretaPlate"
+              value={formData.carretaPlate}
+              onChange={(e) => handlePlateChange('carretaPlate', e.target.value)}
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.carretaPlate ? 'border-red-300' : 'border-gray-300'
+              }`}
+              placeholder="DEF-5678"
+              maxLength={8}
+            />
+            {errors.carretaPlate && (
+              <p className="mt-1 text-sm text-red-600">{errors.carretaPlate}</p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+              Opcional - Informe a placa da carreta/reboque que este motorista utiliza
+            </p>
           </div>
         </div>
       </div>

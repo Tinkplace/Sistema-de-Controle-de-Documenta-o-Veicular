@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Phone, Mail, Plus, Edit, Trash2, FileText } from 'lucide-react';
+import { User, Phone, Mail, Plus, Edit, Trash2, FileText, Truck } from 'lucide-react';
 import { Driver } from '../../types';
 import Button from '../Common/Button';
 import StatusBadge from '../Common/StatusBadge';
@@ -70,6 +70,24 @@ const DriverList: React.FC<DriverListProps> = ({
                           {driver.phone}
                         </div>
                       </div>
+                      
+                      {/* Placas dos Veículos */}
+                      {(driver.cavaloPlate || driver.carretaPlate) && (
+                        <div className="flex items-center space-x-4 text-sm text-gray-600 mt-2">
+                          {driver.cavaloPlate && (
+                            <div className="flex items-center bg-blue-50 px-2 py-1 rounded">
+                              <Truck className="h-3 w-3 mr-1 text-blue-600" />
+                              <span className="text-blue-700 font-medium">Cavalo: {driver.cavaloPlate}</span>
+                            </div>
+                          )}
+                          {driver.carretaPlate && (
+                            <div className="flex items-center bg-green-50 px-2 py-1 rounded">
+                              <Truck className="h-3 w-3 mr-1 text-green-600" />
+                              <span className="text-green-700 font-medium">Carreta: {driver.carretaPlate}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                   
