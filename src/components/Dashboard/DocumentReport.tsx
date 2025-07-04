@@ -145,14 +145,17 @@ const DocumentReport: React.FC<DocumentReportProps> = ({ drivers, vehicles }) =>
   const handleExportPDF = () => {
     const exportData: DocumentExportData[] = filteredData.map(item => ({
       id: item.id,
-      entityName: `${item.nome} (${item.placa})`,
+      entityName: `${item.nome} - ${item.placa}`, // Keep for compatibility
       entityType: item.entityType,
       documentType: item.documentType,
       issueDate: item.issueDate,
       expiryDate: item.expiryDate,
       status: item.status,
       daysUntilExpiry: item.daysUntilExpiry,
-      observations: item.observations
+      observations: item.observations,
+      // Separated columns
+      nome: item.nome,
+      placa: item.placa
     }));
     
     exportToPDF(exportData, 'Relatório Detalhado de Documentos');
@@ -161,14 +164,17 @@ const DocumentReport: React.FC<DocumentReportProps> = ({ drivers, vehicles }) =>
   const handleExportExcel = () => {
     const exportData: DocumentExportData[] = filteredData.map(item => ({
       id: item.id,
-      entityName: `${item.nome} (${item.placa})`,
+      entityName: `${item.nome} - ${item.placa}`, // Keep for compatibility
       entityType: item.entityType,
       documentType: item.documentType,
       issueDate: item.issueDate,
       expiryDate: item.expiryDate,
       status: item.status,
       daysUntilExpiry: item.daysUntilExpiry,
-      observations: item.observations
+      observations: item.observations,
+      // Separated columns
+      nome: item.nome,
+      placa: item.placa
     }));
     
     exportToExcel(exportData, 'Relatório Detalhado de Documentos');

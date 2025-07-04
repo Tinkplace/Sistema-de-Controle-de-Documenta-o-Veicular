@@ -12,6 +12,9 @@ export interface DocumentExportData {
   status: string;
   daysUntilExpiry: number;
   observations?: string;
+  // New fields for separated columns
+  nome?: string;
+  placa?: string;
 }
 
 export const exportToPDF = (documents: DocumentExportData[], title: string = 'Relatório de Documentos') => {
@@ -25,36 +28,53 @@ export const exportToPDF = (documents: DocumentExportData[], title: string = 'Re
   doc.setFontSize(10);
   doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 30);
   
-  // Prepare table data
-  const tableData = documents.map(doc => [
-    doc.entityName,
-    doc.entityType,
-    doc.documentType,
-    new Date(doc.issueDate).toLocaleDateString('pt-BR'),
-    new Date(doc.expiryDate).toLocaleDateString('pt-BR'),
-    doc.status === 'valid' ? 'Válido' : 
-    doc.status === 'expiring_soon' ? 'Próximo ao Vencimento' : 'Vencido',
-    doc.daysUntilExpiry.toString(),
-    doc.observations || ''
-  ]);
+  // Prepare table data with separated name and plate columns
+  const tableData = documents.map(doc => {
+    // Extract name and plate from entityName if not provided separately
+    let nome = doc.nome || doc.entityName;
+    let placa = doc.placa || '-';
+    
+    // If we have entityName in format "Name - Plate" or "Name (Plate)", extract them
+    if (!doc.nome && !doc.placa) {
+      const plateMatch = doc.entityName.match(/([A-Z]{3}-\d{4})/);
+      if (plateMatch) {
+        placa = plateMatch[1];
+        nome = doc.entityName.replace(/\s*-?\s*[A-Z]{3}-\d{4}.*$/, '').trim();
+      }
+    }
+    
+    return [
+      nome,
+      placa,
+      doc.entityType,
+      doc.documentType,
+      new Date(doc.issueDate).toLocaleDateString('pt-BR'),
+      new Date(doc.expiryDate).toLocaleDateString('pt-BR'),
+      doc.status === 'valid' ? 'Válido' : 
+      doc.status === 'expiring_soon' ? 'Próximo ao Vencimento' : 'Vencido',
+      doc.daysUntilExpiry.toString(),
+      doc.observations || ''
+    ];
+  });
   
-  // Add table
+  // Add table with separated columns
   autoTable(doc, {
-    head: [['Nome/Placa', 'Tipo', 'Documento', 'Emissão', 'Validade', 'Status', 'Dias', 'Observações']],
+    head: [['Nome', 'Placa', 'Tipo', 'Documento', 'Emissão', 'Validade', 'Status', 'Dias', 'Observações']],
     body: tableData,
     startY: 35,
     styles: { fontSize: 8 },
     headStyles: { fillColor: [59, 130, 246] },
     alternateRowStyles: { fillColor: [249, 250, 251] },
     columnStyles: {
-      0: { cellWidth: 25 },
-      1: { cellWidth: 20 },
-      2: { cellWidth: 25 },
-      3: { cellWidth: 20 },
-      4: { cellWidth: 20 },
-      5: { cellWidth: 25 },
-      6: { cellWidth: 15 },
-      7: { cellWidth: 30 }
+      0: { cellWidth: 30 }, // Nome
+      1: { cellWidth: 20 }, // Placa
+      2: { cellWidth: 18 }, // Tipo
+      3: { cellWidth: 25 }, // Documento
+      4: { cellWidth: 18 }, // Emissão
+      5: { cellWidth: 18 }, // Validade
+      6: { cellWidth: 22 }, // Status
+      7: { cellWidth: 12 }, // Dias
+      8: { cellWidth: 27 }  // Observações
     }
   });
   
@@ -63,18 +83,34 @@ export const exportToPDF = (documents: DocumentExportData[], title: string = 'Re
 };
 
 export const exportToExcel = (documents: DocumentExportData[], title: string = 'Relatório de Documentos') => {
-  // Prepare data for Excel
-  const excelData = documents.map(doc => ({
-    'Nome/Placa': doc.entityName,
-    'Tipo': doc.entityType,
-    'Documento': doc.documentType,
-    'Data de Emissão': new Date(doc.issueDate).toLocaleDateString('pt-BR'),
-    'Data de Validade': new Date(doc.expiryDate).toLocaleDateString('pt-BR'),
-    'Status': doc.status === 'valid' ? 'Válido' : 
-              doc.status === 'expiring_soon' ? 'Próximo ao Vencimento' : 'Vencido',
-    'Dias até Vencimento': doc.daysUntilExpiry,
-    'Observações': doc.observations || ''
-  }));
+  // Prepare data for Excel with separated name and plate columns
+  const excelData = documents.map(doc => {
+    // Extract name and plate from entityName if not provided separately
+    let nome = doc.nome || doc.entityName;
+    let placa = doc.placa || '-';
+    
+    // If we have entityName in format "Name - Plate" or "Name (Plate)", extract them
+    if (!doc.nome && !doc.placa) {
+      const plateMatch = doc.entityName.match(/([A-Z]{3}-\d{4})/);
+      if (plateMatch) {
+        placa = plateMatch[1];
+        nome = doc.entityName.replace(/\s*-?\s*[A-Z]{3}-\d{4}.*$/, '').trim();
+      }
+    }
+    
+    return {
+      'Nome': nome,
+      'Placa': placa,
+      'Tipo': doc.entityType,
+      'Documento': doc.documentType,
+      'Data de Emissão': new Date(doc.issueDate).toLocaleDateString('pt-BR'),
+      'Data de Validade': new Date(doc.expiryDate).toLocaleDateString('pt-BR'),
+      'Status': doc.status === 'valid' ? 'Válido' : 
+                doc.status === 'expiring_soon' ? 'Próximo ao Vencimento' : 'Vencido',
+      'Dias até Vencimento': doc.daysUntilExpiry,
+      'Observações': doc.observations || ''
+    };
+  });
   
   // Create workbook and worksheet
   const wb = XLSX.utils.book_new();
@@ -82,7 +118,8 @@ export const exportToExcel = (documents: DocumentExportData[], title: string = '
   
   // Set column widths
   const colWidths = [
-    { wch: 25 }, // Nome/Placa
+    { wch: 30 }, // Nome
+    { wch: 12 }, // Placa
     { wch: 15 }, // Tipo
     { wch: 25 }, // Documento
     { wch: 15 }, // Data de Emissão

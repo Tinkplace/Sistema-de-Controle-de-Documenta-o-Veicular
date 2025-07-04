@@ -68,7 +68,10 @@ const Dashboard: React.FC<DashboardProps> = ({
           status: doc.status,
           daysUntilExpiry: getDaysUntilExpiry(doc.expiryDate),
           observations: doc.observations,
-          entity: driver
+          entity: driver,
+          // Add separated name and plate for export
+          nome: driver.name,
+          placa: driver.cavaloPlate || driver.carretaPlate || '-'
         }))
       ),
       ...vehicles.flatMap(vehicle => 
@@ -83,7 +86,10 @@ const Dashboard: React.FC<DashboardProps> = ({
           status: doc.status,
           daysUntilExpiry: getDaysUntilExpiry(doc.expiryDate),
           observations: doc.observations,
-          entity: vehicle
+          entity: vehicle,
+          // Add separated name and plate for export
+          nome: `${vehicle.brand} ${vehicle.model}`,
+          placa: vehicle.plate
         }))
       )
     ];
@@ -198,7 +204,10 @@ const Dashboard: React.FC<DashboardProps> = ({
       expiryDate: doc.expiryDate,
       status: doc.status,
       daysUntilExpiry: doc.daysUntilExpiry,
-      observations: doc.observations
+      observations: doc.observations,
+      // Add separated columns
+      nome: doc.nome,
+      placa: doc.placa
     }));
     
     exportToPDF(documents, 'Relatório de Documentos - Dashboard');
@@ -214,7 +223,10 @@ const Dashboard: React.FC<DashboardProps> = ({
       expiryDate: doc.expiryDate,
       status: doc.status,
       daysUntilExpiry: doc.daysUntilExpiry,
-      observations: doc.observations
+      observations: doc.observations,
+      // Add separated columns
+      nome: doc.nome,
+      placa: doc.placa
     }));
     
     exportToExcel(documents, 'Relatório de Documentos - Dashboard');
