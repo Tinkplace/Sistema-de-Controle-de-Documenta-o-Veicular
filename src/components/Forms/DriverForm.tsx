@@ -66,12 +66,16 @@ const DriverForm: React.FC<DriverFormProps> = ({
       newErrors.phone = 'Formato: (11) 99999-9999';
     }
 
-    // Validação placas (opcionais, mas se preenchidas devem estar no formato correto)
-    if (formData.cavaloPlate && !/^[A-Z]{3}-\d{4}$/.test(formData.cavaloPlate.toUpperCase())) {
+    // ✨ MODIFICAÇÃO: Validação obrigatória das placas
+    if (!formData.cavaloPlate.trim()) {
+      newErrors.cavaloPlate = 'Placa do cavalo mecânico é obrigatória';
+    } else if (!/^[A-Z]{3}-\d{4}$/.test(formData.cavaloPlate.toUpperCase())) {
       newErrors.cavaloPlate = 'Formato: ABC-1234';
     }
 
-    if (formData.carretaPlate && !/^[A-Z]{3}-\d{4}$/.test(formData.carretaPlate.toUpperCase())) {
+    if (!formData.carretaPlate.trim()) {
+      newErrors.carretaPlate = 'Placa da carreta/reboque é obrigatória';
+    } else if (!/^[A-Z]{3}-\d{4}$/.test(formData.carretaPlate.toUpperCase())) {
       newErrors.carretaPlate = 'Formato: ABC-1234';
     }
 
@@ -271,19 +275,19 @@ const DriverForm: React.FC<DriverFormProps> = ({
         </div>
       </div>
 
-      {/* Veículos Associados */}
-      <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-        <h3 className="text-lg font-semibold text-blue-900 mb-4 flex items-center">
+      {/* ✨ MODIFICAÇÃO: Veículos Associados - Agora obrigatórios */}
+      <div className="bg-red-50 p-6 rounded-lg border border-red-200">
+        <h3 className="text-lg font-semibold text-red-900 mb-4 flex items-center">
           <Truck className="h-5 w-5 mr-2" />
-          Veículos Associados
+          Veículos Associados *
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Placa do Cavalo */}
+          {/* Placa do Cavalo - OBRIGATÓRIA */}
           <div>
             <label htmlFor="cavaloPlate" className="block text-sm font-medium text-gray-700 mb-2">
               <Truck className="h-4 w-4 inline mr-1" />
-              Placa do Cavalo Mecânico
+              Placa do Cavalo Mecânico *
             </label>
             <input
               type="text"
@@ -295,20 +299,21 @@ const DriverForm: React.FC<DriverFormProps> = ({
               }`}
               placeholder="ABC-1234"
               maxLength={8}
+              required
             />
             {errors.cavaloPlate && (
               <p className="mt-1 text-sm text-red-600">{errors.cavaloPlate}</p>
             )}
-            <p className="mt-1 text-xs text-gray-500">
-              Opcional - Informe a placa do cavalo mecânico que este motorista utiliza
+            <p className="mt-1 text-xs text-red-700 font-medium">
+              ⚠️ Campo obrigatório - Informe a placa do cavalo mecânico que este motorista utiliza
             </p>
           </div>
 
-          {/* Placa da Carreta */}
+          {/* Placa da Carreta - OBRIGATÓRIA */}
           <div>
             <label htmlFor="carretaPlate" className="block text-sm font-medium text-gray-700 mb-2">
               <Truck className="h-4 w-4 inline mr-1" />
-              Placa da Carreta/Reboque
+              Placa da Carreta/Reboque *
             </label>
             <input
               type="text"
@@ -320,12 +325,13 @@ const DriverForm: React.FC<DriverFormProps> = ({
               }`}
               placeholder="DEF-5678"
               maxLength={8}
+              required
             />
             {errors.carretaPlate && (
               <p className="mt-1 text-sm text-red-600">{errors.carretaPlate}</p>
             )}
-            <p className="mt-1 text-xs text-gray-500">
-              Opcional - Informe a placa da carreta/reboque que este motorista utiliza
+            <p className="mt-1 text-xs text-red-700 font-medium">
+              ⚠️ Campo obrigatório - Informe a placa da carreta/reboque que este motorista utiliza
             </p>
           </div>
         </div>
