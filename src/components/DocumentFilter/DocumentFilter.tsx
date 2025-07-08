@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, Calendar, AlertTriangle, CheckCircle, XCircle, Clock, FileText, User, Truck, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Filter, Calendar, AlertTriangle, CheckCircle, XCircle, Clock, FileText, User, Truck, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { Driver, Vehicle, DocumentStatus } from '../../types';
 import Button from '../Common/Button';
 import { formatDate, getDaysUntilExpiry, getDocumentTypeLabel, getStatusText } from '../../utils/documentHelpers';
+import { exportToPDF, exportToExcel, DocumentExportData } from '../../utils/exportHelpers';
 
 interface DocumentFilterProps {
   drivers: Driver[];
@@ -153,6 +154,44 @@ const DocumentFilter: React.FC<DocumentFilterProps> = ({ drivers, vehicles }) =>
     setCurrentPage(1);
   };
 
+  const handleExportPDF = () => {
+    const documents: DocumentExportData[] = filteredDocuments.map(doc => ({
+      id: doc.id,
+      entityName: doc.entityName,
+      entityType: doc.entityType,
+      documentType: doc.documentType,
+      issueDate: doc.issueDate,
+      expiryDate: doc.expiryDate,
+      status: doc.status,
+      daysUntilExpiry: doc.daysUntilExpiry,
+      observations: doc.observations,
+      // Add separated columns
+      nome: doc.entityType === 'Motorista' ? doc.entityName : doc.entityName.split(' - ')[0],
+      placa: doc.entityType === 'Veículo' ? doc.entityName.split(' - ')[1] || '-' : '-'
+    }));
+    
+    exportToPDF(documents, 'Filtro de Documentos - Resultados');
+  };
+
+  const handleExportExcel = () => {
+    const documents: DocumentExportData[] = filteredDocuments.map(doc => ({
+      id: doc.id,
+      entityName: doc.entityName,
+      entityType: doc.entityType,
+      documentType: doc.documentType,
+      issueDate: doc.issueDate,
+      expiryDate: doc.expiryDate,
+      status: doc.status,
+      daysUntilExpiry: doc.daysUntilExpiry,
+      observations: doc.observations,
+      // Add separated columns
+      nome: doc.entityType === 'Motorista' ? doc.entityName : doc.entityName.split(' - ')[0],
+      placa: doc.entityType === 'Veículo' ? doc.entityName.split(' - ')[1] || '-' : '-'
+    }));
+    
+    exportToExcel(documents, 'Filtro de Documentos - Resultados');
+  };
+
   const getStatusIcon = (status: DocumentStatus) => {
     switch (status) {
       case 'valid':
@@ -299,8 +338,8 @@ const DocumentFilter: React.FC<DocumentFilterProps> = ({ drivers, vehicles }) =>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-            <div className="flex items-center space-x-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t border-gray-200">
+            <div className="flex flex-wrap items-center gap-3">
               <Button
                 onClick={handleSearch}
                 loading={isSearching}
@@ -317,15 +356,40 @@ const DocumentFilter: React.FC<DocumentFilterProps> = ({ drivers, vehicles }) =>
               >
                 Limpar Filtros
               </Button>
+              
+              {/* ✨ MODIFICAÇÃO: Botões de exportação adicionados */}
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleExportPDF}
+                  icon={Download}
+                  disabled={filteredDocuments.length === 0}
+                >
+                  Exportar PDF
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleExportExcel}
+                  icon={Download}
+                  disabled={filteredDocuments.length === 0}
+                >
+                  Exportar Excel
+                </Button>
+              </div>
             </div>
 
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 flex items-center space-x-4">
+              <span>
+                {filteredDocuments.length} documento{filteredDocuments.length !== 1 ? 's' : ''} encontrado{filteredDocuments.length !== 1 ? 's' : ''}
+              </span>
               {filters.status.length > 0 || filters.searchTerm ? (
                 <span className="text-blue-600 font-medium">
-                  Filtros ativos: {filters.status.length + (filters.searchTerm ? 1 : 0)}
+                  {filters.status.length + (filters.searchTerm ? 1 : 0)} filtro{filters.status.length + (filters.searchTerm ? 1 : 0) !== 1 ? 's' : ''} ativo{filters.status.length + (filters.searchTerm ? 1 : 0) !== 1 ? 's' : ''}
                 </span>
               ) : (
-                'Nenhum filtro aplicado'
+                <span className="text-gray-400">Nenhum filtro aplicado</span>
               )}
             </div>
           </div>
