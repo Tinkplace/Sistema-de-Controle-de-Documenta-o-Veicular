@@ -1,20 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { Users, Truck, Clock, AlertTriangle, Bell, TruckIcon, FileText, Download, PieChart, Edit } from 'lucide-react';
+import { Users, Truck, Clock, AlertTriangle, Bell, TruckIcon, PieChart, Edit } from 'lucide-react';
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import StatsCard from './StatsCard';
-import FilterPanel from './FilterPanel';
-import DocumentReport from './DocumentReport';
 import Button from '../Common/Button';
-import { DashboardStats, Driver, Vehicle, DocumentStatus } from '../../types';
+import { DashboardStats, Driver, Vehicle } from '../../types';
 import { formatDate, getDaysUntilExpiry, getStatusText, getDocumentTypeLabel } from '../../utils/documentHelpers';
-import { exportToPDF, exportToExcel, exportVehicleList, DocumentExportData } from '../../utils/exportHelpers';
-
-interface FilterState {
-  status: DocumentStatus[];
-  entityType: ('Motorista' | 'Veículo')[];
-  documentType: string[];
-  searchTerm: string;
-}
+import { exportVehicleList } from '../../utils/exportHelpers';
 
 interface DashboardProps {
   stats: DashboardStats;
@@ -32,13 +23,6 @@ const Dashboard: React.FC<DashboardProps> = ({
   onEditVehicle 
 }) => {
   const [selectedVehicleType, setSelectedVehicleType] = useState<'cavalo_mecanico' | 'reboque' | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState<FilterState>({
-    status: [],
-    entityType: [],
-    documentType: [],
-    searchTerm: ''
-  });
 
   // Calculate vehicle type stats
   const vehicleStats = useMemo(() => {
@@ -68,10 +52,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           status: doc.status,
           daysUntilExpiry: getDaysUntilExpiry(doc.expiryDate),
           observations: doc.observations,
-          entity: driver,
-          // Add separated name and plate for export
-          nome: driver.name,
-          placa: driver.cavaloPlate || driver.carretaPlate || '-'
+          entity: driver
         }))
       ),
       ...vehicles.flatMap(vehicle => 
@@ -86,10 +67,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           status: doc.status,
           daysUntilExpiry: getDaysUntilExpiry(doc.expiryDate),
           observations: doc.observations,
-          entity: vehicle,
-          // Add separated name and plate for export
-          nome: `${vehicle.brand} ${vehicle.model}`,
-          placa: vehicle.plate
+          entity: vehicle
         }))
       )
     ];
@@ -105,140 +83,15 @@ const Dashboard: React.FC<DashboardProps> = ({
     });
   };
 
-  // Apply filters to documents
-  const getFilteredDocuments = () => {
-    let filtered = getAllDocuments();
-
-    // Apply status filter
-    if (filters.status.length > 0) {
-      filtered = filtered.filter(doc => filters.status.includes(doc.status));
-    }
-
-    // Apply entity type filter
-    if (filters.entityType.length > 0) {
-      filtered = filtered.filter(doc => filters.entityType.includes(doc.entityType));
-    }
-
-    // Apply document type filter
-    if (filters.documentType.length > 0) {
-      filtered = filtered.filter(doc => 
-        filters.documentType.some(filterType => 
-          doc.documentType.toLowerCase().includes(filterType.toLowerCase())
-        )
-      );
-    }
-
-    // Apply search term filter
-    if (filters.searchTerm) {
-      const searchLower = filters.searchTerm.toLowerCase();
-      filtered = filtered.filter(doc => 
-        doc.entityName.toLowerCase().includes(searchLower) ||
-        doc.documentType.toLowerCase().includes(searchLower) ||
-        (doc.observations && doc.observations.toLowerCase().includes(searchLower))
-      );
-    }
-
-    return filtered;
-  };
-
-  // Get available filter options
-  const getAvailableFilterOptions = () => {
-    const allDocuments = getAllDocuments();
-    
-    const documentTypes = [...new Set(allDocuments.map(doc => doc.documentType))].sort();
-    const driverNames = [...new Set(drivers.map(driver => driver.name))].sort();
-    const vehicleNames = [...new Set(vehicles.map(vehicle => 
-      `${vehicle.brand} ${vehicle.model} - ${vehicle.plate}`
-    ))].sort();
-
-    return {
-      documentTypes,
-      availableEntities: {
-        drivers: driverNames,
-        vehicles: vehicleNames
-      }
-    };
-  };
-
-  // Prepare chart data
-  const chartData = useMemo(() => {
-    const filteredDocs = getFilteredDocuments();
-    const validCount = filteredDocs.filter(doc => doc.status === 'valid').length;
-    const expiringSoonCount = filteredDocs.filter(doc => doc.status === 'expiring_soon').length;
-    const expiredCount = filteredDocs.filter(doc => doc.status === 'expired').length;
-
-    return [
-      { name: 'Válidos', value: validCount, color: '#10B981' },
-      { name: 'Próximo ao Vencimento', value: expiringSoonCount, color: '#F59E0B' },
-      { name: 'Vencidos', value: expiredCount, color: '#EF4444' }
-    ].filter(item => item.value > 0);
-  }, [drivers, vehicles, filters]);
-
   const handleVehicleTypeClick = (type: 'cavalo_mecanico' | 'reboque') => {
     setSelectedVehicleType(selectedVehicleType === type ? null : type);
-  };
-
-  const handleFilterChange = (filterType: keyof FilterState, value: any) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterType]: value
-    }));
-  };
-
-  const clearFilters = () => {
-    setFilters({
-      status: [],
-      entityType: [],
-      documentType: [],
-      searchTerm: ''
-    });
-  };
-
-  const handleExportPDF = () => {
-    const documents: DocumentExportData[] = getFilteredDocuments().map(doc => ({
-      id: doc.id,
-      entityName: doc.entityName,
-      entityType: doc.entityType,
-      documentType: doc.documentType,
-      issueDate: doc.issueDate,
-      expiryDate: doc.expiryDate,
-      status: doc.status,
-      daysUntilExpiry: doc.daysUntilExpiry,
-      observations: doc.observations,
-      // Add separated columns
-      nome: doc.nome,
-      placa: doc.placa
-    }));
-    
-    exportToPDF(documents, 'Relatório de Documentos - Dashboard');
-  };
-
-  const handleExportExcel = () => {
-    const documents: DocumentExportData[] = getFilteredDocuments().map(doc => ({
-      id: doc.id,
-      entityName: doc.entityName,
-      entityType: doc.entityType,
-      documentType: doc.documentType,
-      issueDate: doc.issueDate,
-      expiryDate: doc.expiryDate,
-      status: doc.status,
-      daysUntilExpiry: doc.daysUntilExpiry,
-      observations: doc.observations,
-      // Add separated columns
-      nome: doc.nome,
-      placa: doc.placa
-    }));
-    
-    exportToExcel(documents, 'Relatório de Documentos - Dashboard');
   };
 
   const handleExportVehicles = (type?: 'cavalo_mecanico' | 'reboque') => {
     exportVehicleList(vehicles, type);
   };
 
-  const filteredDocuments = getFilteredDocuments();
   const allDocuments = getAllDocuments();
-  const { documentTypes, availableEntities } = getAvailableFilterOptions();
 
   return (
     <div className="space-y-6">
@@ -296,56 +149,6 @@ const Dashboard: React.FC<DashboardProps> = ({
           color="yellow"
         />
       </div>
-
-      {/* Advanced Filter System */}
-      <FilterPanel
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        onClearFilters={clearFilters}
-        isExpanded={showFilters}
-        onToggleExpanded={() => setShowFilters(!showFilters)}
-        availableEntities={availableEntities}
-        availableDocumentTypes={documentTypes}
-        filteredCount={filteredDocuments.length}
-        totalCount={allDocuments.length}
-      />
-
-      {/* Export Controls */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Exportar Dados
-            </h3>
-            <span className="text-sm text-gray-600">
-              {filteredDocuments.length} documento{filteredDocuments.length !== 1 ? 's' : ''} selecionado{filteredDocuments.length !== 1 ? 's' : ''}
-            </span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleExportPDF}
-              icon={Download}
-              disabled={filteredDocuments.length === 0}
-            >
-              Exportar PDF
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleExportExcel}
-              icon={Download}
-              disabled={filteredDocuments.length === 0}
-            >
-              Exportar Excel
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Document Report Table */}
-      <DocumentReport drivers={drivers} vehicles={vehicles} />
 
       {/* Vehicle Details Modal/Section */}
       {selectedVehicleType && (
@@ -455,26 +258,29 @@ const Dashboard: React.FC<DashboardProps> = ({
           <h3 className="text-lg font-semibold text-gray-900 flex items-center">
             <PieChart className="h-5 w-5 text-blue-600 mr-2" />
             Status dos Documentos
-            {filteredDocuments.length !== allDocuments.length && (
-              <span className="ml-2 text-sm text-gray-500">
-                (Filtrado: {filteredDocuments.length}/{allDocuments.length})
-              </span>
-            )}
           </h3>
         </div>
         <div className="p-6">
-          {chartData.length > 0 ? (
+          {allDocuments.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <RechartsPieChart>
                 <Pie
-                  data={chartData}
+                  data={[
+                    { name: 'Válidos', value: allDocuments.filter(doc => doc.status === 'valid').length, color: '#10B981' },
+                    { name: 'Próximo ao Vencimento', value: allDocuments.filter(doc => doc.status === 'expiring_soon').length, color: '#F59E0B' },
+                    { name: 'Vencidos', value: allDocuments.filter(doc => doc.status === 'expired').length, color: '#EF4444' }
+                  ].filter(item => item.value > 0)}
                   cx="50%"
                   cy="50%"
                   outerRadius={100}
                   dataKey="value"
                   label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                 >
-                  {chartData.map((entry, index) => (
+                  {[
+                    { name: 'Válidos', value: allDocuments.filter(doc => doc.status === 'valid').length, color: '#10B981' },
+                    { name: 'Próximo ao Vencimento', value: allDocuments.filter(doc => doc.status === 'expiring_soon').length, color: '#F59E0B' },
+                    { name: 'Vencidos', value: allDocuments.filter(doc => doc.status === 'expired').length, color: '#EF4444' }
+                  ].filter(item => item.value > 0).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
