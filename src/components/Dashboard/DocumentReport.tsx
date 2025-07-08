@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { FileText, Download, User, Truck, Calendar, AlertTriangle, Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { FileText, Download, User, Truck, Calendar, AlertTriangle } from 'lucide-react';
 import { Driver, Vehicle, DocumentStatus } from '../../types';
 import Button from '../Common/Button';
 import { formatDate, getDaysUntilExpiry, getDocumentTypeLabel, getStatusText } from '../../utils/documentHelpers';
@@ -23,20 +23,7 @@ interface ReportItem {
   observations?: string;
 }
 
-interface FilterState {
-  status: DocumentStatus[];
-  entityType: ('Motorista' | 'Veículo')[];
-  searchTerm: string;
-}
-
 const DocumentReport: React.FC<DocumentReportProps> = ({ drivers, vehicles }) => {
-  const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState<FilterState>({
-    status: [],
-    entityType: [],
-    searchTerm: ''
-  });
-
   // Generate report data with separated name and plate columns
   const reportData = useMemo(() => {
     const data: ReportItem[] = [];
@@ -88,62 +75,8 @@ const DocumentReport: React.FC<DocumentReportProps> = ({ drivers, vehicles }) =>
     });
   }, [drivers, vehicles]);
 
-  // Apply filters
-  const filteredData = useMemo(() => {
-    let filtered = reportData;
-
-    // Apply status filter
-    if (filters.status.length > 0) {
-      filtered = filtered.filter(item => filters.status.includes(item.status));
-    }
-
-    // Apply entity type filter
-    if (filters.entityType.length > 0) {
-      filtered = filtered.filter(item => filters.entityType.includes(item.entityType));
-    }
-
-    // Apply search filter
-    if (filters.searchTerm) {
-      const searchLower = filters.searchTerm.toLowerCase();
-      filtered = filtered.filter(item => 
-        item.nome.toLowerCase().includes(searchLower) ||
-        item.placa.toLowerCase().includes(searchLower) ||
-        item.documentType.toLowerCase().includes(searchLower) ||
-        (item.observations && item.observations.toLowerCase().includes(searchLower))
-      );
-    }
-
-    return filtered;
-  }, [reportData, filters]);
-
-  const handleStatusToggle = (status: DocumentStatus) => {
-    setFilters(prev => ({
-      ...prev,
-      status: prev.status.includes(status)
-        ? prev.status.filter(s => s !== status)
-        : [...prev.status, status]
-    }));
-  };
-
-  const handleEntityTypeToggle = (entityType: 'Motorista' | 'Veículo') => {
-    setFilters(prev => ({
-      ...prev,
-      entityType: prev.entityType.includes(entityType)
-        ? prev.entityType.filter(e => e !== entityType)
-        : [...prev.entityType, entityType]
-    }));
-  };
-
-  const clearFilters = () => {
-    setFilters({
-      status: [],
-      entityType: [],
-      searchTerm: ''
-    });
-  };
-
   const handleExportPDF = () => {
-    const exportData: DocumentExportData[] = filteredData.map(item => ({
+    const exportData: DocumentExportData[] = reportData.map(item => ({
       id: item.id,
       entityName: `${item.nome} - ${item.placa}`, // Keep for compatibility
       entityType: item.entityType,
@@ -162,7 +95,7 @@ const DocumentReport: React.FC<DocumentReportProps> = ({ drivers, vehicles }) =>
   };
 
   const handleExportExcel = () => {
-    const exportData: DocumentExportData[] = filteredData.map(item => ({
+    const exportData: DocumentExportData[] = reportData.map(item => ({
       id: item.id,
       entityName: `${item.nome} - ${item.placa}`, // Keep for compatibility
       entityType: item.entityType,
@@ -202,11 +135,9 @@ const DocumentReport: React.FC<DocumentReportProps> = ({ drivers, vehicles }) =>
     }
   };
 
-  const activeFiltersCount = filters.status.length + filters.entityType.length + (filters.searchTerm ? 1 : 0);
-
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-      {/* Header */}
+      {/* ✨ MODIFICAÇÃO: Header simplificado sem filtros duplicados */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -216,8 +147,7 @@ const DocumentReport: React.FC<DocumentReportProps> = ({ drivers, vehicles }) =>
                 Relatório Detalhado de Documentos
               </h3>
               <p className="text-sm text-gray-600">
-                {filteredData.length} documento{filteredData.length !== 1 ? 's' : ''} 
-                {activeFiltersCount > 0 && ` (${reportData.length} total)`}
+                {reportData.length} documento{reportData.length !== 1 ? 's' : ''} cadastrado{reportData.length !== 1 ? 's' : ''}
               </p>
             </div>
           </div>
@@ -226,24 +156,9 @@ const DocumentReport: React.FC<DocumentReportProps> = ({ drivers, vehicles }) =>
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              icon={Filter}
-            >
-              Filtros
-              {showFilters ? <ChevronUp className="h-4 w-4 ml-1" /> : <ChevronDown className="h-4 w-4 ml-1" />}
-              {activeFiltersCount > 0 && (
-                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  {activeFiltersCount}
-                </span>
-              )}
-            </Button>
-            
-            <Button
-              variant="secondary"
-              size="sm"
               onClick={handleExportPDF}
               icon={Download}
-              disabled={filteredData.length === 0}
+              disabled={reportData.length === 0}
             >
               PDF
             </Button>
@@ -253,7 +168,7 @@ const DocumentReport: React.FC<DocumentReportProps> = ({ drivers, vehicles }) =>
               size="sm"
               onClick={handleExportExcel}
               icon={Download}
-              disabled={filteredData.length === 0}
+              disabled={reportData.length === 0}
             >
               Excel
             </Button>
@@ -261,102 +176,16 @@ const DocumentReport: React.FC<DocumentReportProps> = ({ drivers, vehicles }) =>
         </div>
       </div>
 
-      {/* Filters Panel */}
-      {showFilters && (
-        <div className="p-6 border-b border-gray-200 bg-gray-50">
-          <div className="space-y-4">
-            {/* Search */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Buscar
-              </label>
-              <input
-                type="text"
-                value={filters.searchTerm}
-                onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Buscar por nome, placa, documento..."
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Status Filter */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Status
-                </label>
-                <div className="space-y-2">
-                  {(['valid', 'expiring_soon', 'expired'] as DocumentStatus[]).map((status) => (
-                    <label key={status} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={filters.status.includes(status)}
-                        onChange={() => handleStatusToggle(status)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">
-                        {getStatusText(status)}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Entity Type Filter */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tipo
-                </label>
-                <div className="space-y-2">
-                  {(['Motorista', 'Veículo'] as const).map((entityType) => (
-                    <label key={entityType} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={filters.entityType.includes(entityType)}
-                        onChange={() => handleEntityTypeToggle(entityType)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">
-                        {entityType}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Filter Actions */}
-            <div className="flex items-center justify-between pt-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={clearFilters}
-                disabled={activeFiltersCount === 0}
-              >
-                Limpar Filtros
-              </Button>
-              
-              <span className="text-sm text-gray-600">
-                {filteredData.length} de {reportData.length} documentos
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Table */}
       <div className="overflow-x-auto">
-        {filteredData.length === 0 ? (
+        {reportData.length === 0 ? (
           <div className="p-12 text-center">
             <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               Nenhum documento encontrado
             </h3>
             <p className="text-gray-500">
-              {activeFiltersCount > 0 
-                ? 'Tente ajustar os filtros aplicados.'
-                : 'Não há documentos cadastrados no sistema.'
-              }
+              Não há documentos cadastrados no sistema.
             </p>
           </div>
         ) : (
@@ -387,7 +216,7 @@ const DocumentReport: React.FC<DocumentReportProps> = ({ drivers, vehicles }) =>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredData.map((item) => (
+              {reportData.map((item) => (
                 <tr 
                   key={item.id} 
                   className={`hover:bg-gray-50 border-l-4 ${getRowBorderColor(item.status)}`}
@@ -472,24 +301,24 @@ const DocumentReport: React.FC<DocumentReportProps> = ({ drivers, vehicles }) =>
       </div>
 
       {/* Footer */}
-      {filteredData.length > 0 && (
+      {reportData.length > 0 && (
         <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
           <div className="flex items-center justify-between text-sm text-gray-600">
             <div>
-              Total: {filteredData.length} documento{filteredData.length !== 1 ? 's' : ''}
+              Total: {reportData.length} documento{reportData.length !== 1 ? 's' : ''}
             </div>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 bg-red-500 rounded"></div>
-                <span>Vencidos: {filteredData.filter(d => d.status === 'expired').length}</span>
+                <span>Vencidos: {reportData.filter(d => d.status === 'expired').length}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-                <span>Próximos ao vencimento: {filteredData.filter(d => d.status === 'expiring_soon').length}</span>
+                <span>Próximos ao vencimento: {reportData.filter(d => d.status === 'expiring_soon').length}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 bg-green-500 rounded"></div>
-                <span>Válidos: {filteredData.filter(d => d.status === 'valid').length}</span>
+                <span>Válidos: {reportData.filter(d => d.status === 'valid').length}</span>
               </div>
             </div>
           </div>

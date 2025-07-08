@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, X, Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, X, Filter, ChevronDown, ChevronUp, Calendar, User, Truck, FileText } from 'lucide-react';
 import { DocumentStatus } from '../../types';
 import Button from '../Common/Button';
 
@@ -8,7 +8,6 @@ interface FilterState {
   entityType: ('Motorista' | 'Veículo')[];
   documentType: string[];
   searchTerm: string;
-  entityName: string[];
 }
 
 interface FilterPanelProps {
@@ -29,7 +28,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   onClearFilters,
   isExpanded,
   onToggleExpanded,
-  availableEntities,
   availableDocumentTypes,
   filteredCount,
   totalCount
@@ -85,7 +83,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-      {/* Filter Header */}
+      {/* ✨ MODIFICAÇÃO: Header simplificado e mais intuitivo */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -94,7 +92,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               className="flex items-center space-x-2 text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors"
             >
               <Filter className="h-5 w-5" />
-              <span>Filtros Avançados</span>
+              <span>Filtros e Busca</span>
               {isExpanded ? (
                 <ChevronUp className="h-4 w-4" />
               ) : (
@@ -105,7 +103,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             {activeFiltersCount > 0 && (
               <div className="flex items-center space-x-2">
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  {activeFiltersCount} filtro{activeFiltersCount !== 1 ? 's' : ''} ativo{activeFiltersCount !== 1 ? 's' : ''}
+                  {activeFiltersCount} filtro{activeFiltersCount !== 1 ? 's' : ''}
                 </span>
                 <span className="text-sm text-gray-600">
                   {filteredCount} de {totalCount} documentos
@@ -122,20 +120,21 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 onClick={onClearFilters}
                 icon={X}
               >
-                Limpar Filtros
+                Limpar
               </Button>
             )}
           </div>
         </div>
       </div>
 
-      {/* Filter Content */}
+      {/* ✨ MODIFICAÇÃO: Interface de filtros reorganizada e mais intuitiva */}
       {isExpanded && (
         <div className="p-6 space-y-6">
-          {/* Search Bar */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Busca Geral
+          {/* Busca Global - Posição de destaque */}
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <label className="block text-sm font-medium text-blue-900 mb-3 flex items-center">
+              <Search className="h-4 w-4 mr-2" />
+              Busca Global
             </label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -143,8 +142,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 type="text"
                 value={filters.searchTerm}
                 onChange={(e) => onFilterChange('searchTerm', e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Buscar por nome, placa, documento ou observações..."
+                className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                placeholder="Digite nome, placa, tipo de documento ou observações..."
               />
               {filters.searchTerm && (
                 <button
@@ -155,17 +154,22 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 </button>
               )}
             </div>
+            <p className="text-xs text-blue-700 mt-2">
+              Busque por qualquer informação: nome do motorista, placa do veículo, tipo de documento ou observações
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Status Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Status do Documento
+          {/* ✨ MODIFICAÇÃO: Filtros organizados em grid responsivo */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Status dos Documentos */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center">
+                <Calendar className="h-4 w-4 mr-2" />
+                Status dos Documentos
               </label>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {(['valid', 'expiring_soon', 'expired'] as DocumentStatus[]).map((status) => (
-                  <label key={status} className="flex items-center">
+                  <label key={status} className="flex items-center cursor-pointer">
                     <input
                       type="checkbox"
                       checked={filters.status.includes(status)}
@@ -180,22 +184,51 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               </div>
             </div>
 
-            {/* Entity Type Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+            {/* Tipo de Entidade */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center">
+                <User className="h-4 w-4 mr-2" />
                 Tipo de Entidade
               </label>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {(['Motorista', 'Veículo'] as const).map((entityType) => (
-                  <label key={entityType} className="flex items-center">
+                  <label key={entityType} className="flex items-center cursor-pointer">
                     <input
                       type="checkbox"
                       checked={filters.entityType.includes(entityType)}
                       onChange={() => handleEntityTypeToggle(entityType)}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <span className="ml-3 text-sm text-gray-700">
-                      {entityType}
+                    <div className="ml-3 flex items-center">
+                      {entityType === 'Motorista' ? (
+                        <User className="h-4 w-4 mr-2 text-blue-600" />
+                      ) : (
+                        <Truck className="h-4 w-4 mr-2 text-green-600" />
+                      )}
+                      <span className="text-sm text-gray-700">{entityType}</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Tipos de Documento */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center">
+                <FileText className="h-4 w-4 mr-2" />
+                Tipos de Documento
+              </label>
+              <div className="space-y-2 max-h-32 overflow-y-auto">
+                {availableDocumentTypes.map((docType) => (
+                  <label key={docType} className="flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={filters.documentType.includes(docType)}
+                      onChange={() => handleDocumentTypeToggle(docType)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span className="ml-2 text-sm text-gray-700 truncate" title={docType}>
+                      {docType}
                     </span>
                   </label>
                 ))}
@@ -203,36 +236,24 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             </div>
           </div>
 
-          {/* Document Type Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Tipo de Documento
-            </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-              {availableDocumentTypes.map((docType) => (
-                <label key={docType} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={filters.documentType.includes(docType)}
-                    onChange={() => handleDocumentTypeToggle(docType)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <span className="ml-2 text-sm text-gray-700 truncate" title={docType}>
-                    {docType}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Active Filters Summary */}
+          {/* ✨ MODIFICAÇÃO: Resumo de filtros ativos mais visual */}
           {activeFiltersCount > 0 && (
             <div className="pt-4 border-t border-gray-200">
-              <h4 className="text-sm font-medium text-gray-700 mb-3">Filtros Ativos:</h4>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-medium text-gray-700 flex items-center">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filtros Ativos ({activeFiltersCount})
+                </h4>
+                <span className="text-sm text-gray-600">
+                  {filteredCount} resultado{filteredCount !== 1 ? 's' : ''}
+                </span>
+              </div>
+              
               <div className="flex flex-wrap gap-2">
                 {filters.searchTerm && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    Busca: "{filters.searchTerm}"
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                    <Search className="h-3 w-3 mr-1" />
+                    "{filters.searchTerm}"
                     <button
                       onClick={() => onFilterChange('searchTerm', '')}
                       className="ml-2 text-blue-600 hover:text-blue-800"
@@ -243,7 +264,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 )}
                 
                 {filters.status.map((status) => (
-                  <span key={status} className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
+                  <span key={status} className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(status)}`}>
+                    <Calendar className="h-3 w-3 mr-1" />
                     {getStatusText(status)}
                     <button
                       onClick={() => handleStatusToggle(status)}
@@ -255,7 +277,12 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 ))}
                 
                 {filters.entityType.map((entityType) => (
-                  <span key={entityType} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                  <span key={entityType} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
+                    {entityType === 'Motorista' ? (
+                      <User className="h-3 w-3 mr-1" />
+                    ) : (
+                      <Truck className="h-3 w-3 mr-1" />
+                    )}
                     {entityType}
                     <button
                       onClick={() => handleEntityTypeToggle(entityType)}
@@ -267,7 +294,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 ))}
                 
                 {filters.documentType.map((docType) => (
-                  <span key={docType} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <span key={docType} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                    <FileText className="h-3 w-3 mr-1" />
                     {docType}
                     <button
                       onClick={() => handleDocumentTypeToggle(docType)}
