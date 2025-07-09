@@ -394,6 +394,109 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
         </div>
       </div>
 
+      {/* Dados do Proprietário */}
+      <div className="bg-gray-50 p-6 rounded-lg">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <User className="h-5 w-5 mr-2" />
+          Dados do Proprietário
+        </h3>
+        
+        <div className="grid gap-4">
+          {/* Nome do Proprietário */}
+          <div>
+            <label htmlFor="ownerName" className="block text-sm font-medium text-gray-700 mb-2">
+              Nome do Proprietário *
+            </label>
+            <input
+              type="text"
+              id="ownerName"
+              value={formData.owner.name}
+              onChange={(e) => setFormData(prev => ({ 
+                ...prev, 
+                owner: { ...prev.owner, name: e.target.value }
+              }))}
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.ownerName ? 'border-red-300' : 'border-gray-300'
+              }`}
+              placeholder="Nome completo ou razão social"
+            />
+            {errors.ownerName && (
+              <p className="mt-1 text-sm text-red-600">{errors.ownerName}</p>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* CPF/CNPJ */}
+            <div>
+              <label htmlFor="ownerDocument" className="block text-sm font-medium text-gray-700 mb-2">
+                <CreditCard className="h-4 w-4 inline mr-1" />
+                CPF/CNPJ *
+              </label>
+              <input
+                type="text"
+                id="ownerDocument"
+                value={formData.owner.document}
+                onChange={(e) => handleDocumentChange(e.target.value)}
+                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.ownerDocument ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                maxLength={18}
+              />
+              {errors.ownerDocument && (
+                <p className="mt-1 text-sm text-red-600">{errors.ownerDocument}</p>
+              )}
+            </div>
+
+            {/* Telefone */}
+            <div>
+              <label htmlFor="ownerPhone" className="block text-sm font-medium text-gray-700 mb-2">
+                <Phone className="h-4 w-4 inline mr-1" />
+                Telefone *
+              </label>
+              <input
+                type="tel"
+                id="ownerPhone"
+                value={formData.owner.phone}
+                onChange={(e) => handlePhoneChange(e.target.value)}
+                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.ownerPhone ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder="(11) 99999-9999"
+                maxLength={15}
+              />
+              {errors.ownerPhone && (
+                <p className="mt-1 text-sm text-red-600">{errors.ownerPhone}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Email */}
+          <div>
+            <label htmlFor="ownerEmail" className="block text-sm font-medium text-gray-700 mb-2">
+              <Mail className="h-4 w-4 inline mr-1" />
+              Email *
+            </label>
+            <input
+              type="email"
+              id="ownerEmail"
+              value={formData.owner.email}
+              onChange={(e) => setFormData(prev => ({ 
+                ...prev, 
+                owner: { ...prev.owner, email: e.target.value }
+              }))}
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.ownerEmail ? 'border-red-300' : 'border-gray-300'
+              }`}
+              placeholder="exemplo@email.com"
+            />
+            {errors.ownerEmail && (
+              <p className="mt-1 text-sm text-red-600">{errors.ownerEmail}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Documentos */}
       <div className="space-y-6">
         <h3 className="text-lg font-semibold text-gray-900 flex items-center">
@@ -576,7 +679,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
                   <input
                     type="date"
                     value={documents.relatorio_opacidade?.issueDate || ''}
-                    onChange={(e) => handleVehicleDocumentChange('relatorio_opacidade', 'issueDate', e.target.value)}
+                    onChange={(e) => handleDocumentChange('relatorio_opacidade', 'issueDate', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -589,7 +692,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
                   <input
                     type="date"
                     value={documents.relatorio_opacidade?.expiryDate || ''}
-                    onChange={(e) => handleVehicleDocumentChange('relatorio_opacidade', 'expiryDate', e.target.value)}
+                    onChange={(e) => handleDocumentChange('relatorio_opacidade', 'expiryDate', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -604,7 +707,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
                 </label>
                 <textarea
                   value={documents.relatorio_opacidade?.observations || ''}
-                  onChange={(e) => handleVehicleDocumentChange('relatorio_opacidade', 'observations', e.target.value)}
+                  onChange={(e) => handleDocumentChange('relatorio_opacidade', 'observations', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   rows={2}
                   placeholder="Informações adicionais sobre o laudo de opacidade"

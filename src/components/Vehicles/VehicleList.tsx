@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Truck, Plus, Edit, Trash2, FileText } from 'lucide-react';
+import { Truck, Plus, Edit, Trash2, FileText, User, Phone, Mail, CreditCard } from 'lucide-react';
 import { Vehicle } from '../../types';
 import Button from '../Common/Button';
 import StatusBadge from '../Common/StatusBadge';
@@ -84,6 +84,26 @@ const VehicleList: React.FC<VehicleListProps> = ({
                       <p className="text-sm text-gray-500 mt-1">
                         {vehicle.brand} {vehicle.model} - {vehicle.year}
                       </p>
+                     
+                     {/* Owner Information */}
+                     <div className="flex items-center space-x-4 text-xs text-gray-500 mt-2">
+                       <div className="flex items-center">
+                         <User className="h-3 w-3 mr-1" />
+                         {vehicle.owner.name}
+                       </div>
+                       <div className="flex items-center">
+                         <CreditCard className="h-3 w-3 mr-1" />
+                         {vehicle.owner.document}
+                       </div>
+                       <div className="flex items-center">
+                         <Phone className="h-3 w-3 mr-1" />
+                         {vehicle.owner.phone}
+                       </div>
+                       <div className="flex items-center">
+                         <Mail className="h-3 w-3 mr-1" />
+                         {vehicle.owner.email}
+                       </div>
+                     </div>
                     </div>
                   </div>
                   
