@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Truck, Save, X, FileText, Calendar, Shield, Gauge, Volume2, Eye } from 'lucide-react';
+import { Truck, Save, X, FileText, Calendar, Shield, Gauge, Volume2, Eye, User, Phone, Mail, CreditCard } from 'lucide-react';
 import { Vehicle, VehicleDocument } from '../../types';
 import Button from '../Common/Button';
 import { getDocumentStatus } from '../../utils/documentHelpers';
@@ -22,7 +22,13 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
     type: vehicle?.type || 'cavalo_mecanico' as const,
     brand: vehicle?.brand || '',
     model: vehicle?.model || '',
-    year: vehicle?.year || new Date().getFullYear()
+    year: vehicle?.year || new Date().getFullYear(),
+    owner: {
+      name: vehicle?.owner?.name || '',
+      document: vehicle?.owner?.document || '',
+      phone: vehicle?.owner?.phone || '',
+      email: vehicle?.owner?.email || ''
+    }
   });
 
   // Initialize documents based on vehicle type and existing data
@@ -105,6 +111,32 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
       newErrors.year = 'Ano inválido';
     }
 
+    // Validação dados do proprietário
+    if (!formData.owner.name.trim()) {
+      newErrors.ownerName = 'Nome do proprietário é obrigatório';
+    }
+
+    if (!formData.owner.document.trim()) {
+      newErrors.ownerDocument = 'CPF/CNPJ é obrigatório';
+    } else {
+      // Basic CPF/CNPJ format validation
+      const cleanDoc = formData.owner.document.replace(/\D/g, '');
+      if (cleanDoc.length !== 11 && cleanDoc.length !== 14) {
+        newErrors.ownerDocument = 'CPF deve ter 11 dígitos ou CNPJ deve ter 14 dígitos';
+      }
+    }
+
+    if (!formData.owner.phone.trim()) {
+      newErrors.ownerPhone = 'Telefone é obrigatório';
+    } else if (!/^\(\d{2}\)\s\d{4,5}-\d{4}$/.test(formData.owner.phone)) {
+      newErrors.ownerPhone = 'Formato: (11) 99999-9999';
+    }
+
+    if (!formData.owner.email.trim()) {
+      newErrors.ownerEmail = 'Email é obrigatório';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.owner.email)) {
+      newErrors.ownerEmail = 'Email inválido';
+    }
     // Validação datas dos documentos
     Object.entries(documents).forEach(([docType, docData]) => {
       if (docData.issueDate && docData.expiryDate) {
@@ -171,7 +203,72 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
     setFormData(prev => ({ ...prev, plate: formatted }));
   };
 
-  const handleDocumentChange = (docType: string, field: string, value: string) => {
+  const handlePhoneChange = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    
+    let formatted = '';
+    if (digits.length >= 2) {
+      formatted = `(${digits.slice(0, 2)})`;
+      if (digits.length >= 3) {
+        formatted += ` ${digits.slice(2, digits.length <= 10 ? 6 : 7)}`;
+        if (digits.length >= 7) {
+          formatted += `-${digits.slice(digits.length <= 10 ? 6 : 7, 11)}`;
+        }
+      }
+    } else {
+      formatted = digits;
+    }
+    
+    setFormData(prev => ({ 
+      ...prev, 
+      owner: { ...prev.owner, phone: formatted }
+    }));
+  };
+
+  const handleDocumentChange = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    
+    let formatted = '';
+    if (digits.length <= 11) {
+      // CPF format: 123.456.789-01
+      if (digits.length >= 3) {
+        formatted = digits.slice(0, 3);
+        if (digits.length >= 6) {
+          formatted += '.' + digits.slice(3, 6);
+          if (digits.length >= 9) {
+            formatted += '.' + digits.slice(6, 9);
+            if (digits.length >= 11) {
+              formatted += '-' + digits.slice(9, 11);
+            }
+          }
+        }
+      } else {
+        formatted = digits;
+      }
+    } else {
+      // CNPJ format: 12.345.678/0001-90
+      formatted = digits.slice(0, 2);
+      if (digits.length >= 5) {
+        formatted += '.' + digits.slice(2, 5);
+        if (digits.length >= 8) {
+          formatted += '.' + digits.slice(5, 8);
+          if (digits.length >= 12) {
+            formatted += '/' + digits.slice(8, 12);
+            if (digits.length >= 14) {
+              formatted += '-' + digits.slice(12, 14);
+            }
+          }
+        }
+      }
+    }
+    
+    setFormData(prev => ({ 
+      ...prev, 
+      owner: { ...prev.owner, document: formatted }
+    }));
+  };
+
+  const handleVehicleDocumentChange = (docType: string, field: string, value: string) => {
     setDocuments(prev => ({
       ...prev,
       [docType]: {
@@ -320,7 +417,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
               <input
                 type="date"
                 value={documents.citv?.issueDate || ''}
-                onChange={(e) => handleDocumentChange('citv', 'issueDate', e.target.value)}
+                onChange={(e) => handleVehicleDocumentChange('citv', 'issueDate', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -333,7 +430,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
               <input
                 type="date"
                 value={documents.citv?.expiryDate || ''}
-                onChange={(e) => handleDocumentChange('citv', 'expiryDate', e.target.value)}
+                onChange={(e) => handleVehicleDocumentChange('citv', 'expiryDate', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -348,7 +445,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
             </label>
             <textarea
               value={documents.citv?.observations || ''}
-              onChange={(e) => handleDocumentChange('citv', 'observations', e.target.value)}
+              onChange={(e) => handleVehicleDocumentChange('citv', 'observations', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               rows={2}
               placeholder="Informações adicionais sobre o CITV"
@@ -372,7 +469,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
               <input
                 type="date"
                 value={documents.crlv?.issueDate || ''}
-                onChange={(e) => handleDocumentChange('crlv', 'issueDate', e.target.value)}
+                onChange={(e) => handleVehicleDocumentChange('crlv', 'issueDate', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -385,7 +482,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
               <input
                 type="date"
                 value={documents.crlv?.expiryDate || ''}
-                onChange={(e) => handleDocumentChange('crlv', 'expiryDate', e.target.value)}
+                onChange={(e) => handleVehicleDocumentChange('crlv', 'expiryDate', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -400,7 +497,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
             </label>
             <textarea
               value={documents.crlv?.observations || ''}
-              onChange={(e) => handleDocumentChange('crlv', 'observations', e.target.value)}
+              onChange={(e) => handleVehicleDocumentChange('crlv', 'observations', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               rows={2}
               placeholder="Informações adicionais sobre o CRLV"
@@ -424,7 +521,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
               <input
                 type="date"
                 value={documents.seguro_veiculo?.issueDate || ''}
-                onChange={(e) => handleDocumentChange('seguro_veiculo', 'issueDate', e.target.value)}
+                onChange={(e) => handleVehicleDocumentChange('seguro_veiculo', 'issueDate', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -437,7 +534,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
               <input
                 type="date"
                 value={documents.seguro_veiculo?.expiryDate || ''}
-                onChange={(e) => handleDocumentChange('seguro_veiculo', 'expiryDate', e.target.value)}
+                onChange={(e) => handleVehicleDocumentChange('seguro_veiculo', 'expiryDate', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -452,7 +549,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
             </label>
             <textarea
               value={documents.seguro_veiculo?.observations || ''}
-              onChange={(e) => handleDocumentChange('seguro_veiculo', 'observations', e.target.value)}
+              onChange={(e) => handleVehicleDocumentChange('seguro_veiculo', 'observations', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               rows={2}
               placeholder="Informações adicionais sobre o seguro"

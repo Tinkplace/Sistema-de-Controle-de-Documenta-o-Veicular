@@ -169,6 +169,12 @@ export const mockVehicles: Vehicle[] = [
     brand: 'Scania',
     model: 'R450',
     year: 2020,
+    owner: {
+      name: 'João Silva Santos',
+      document: '123.456.789-01',
+      phone: '(11) 99999-1111',
+      email: 'joao.silva@email.com'
+    },
     createdAt: '2024-01-20T00:00:00Z',
     documents: [
       {
@@ -246,6 +252,12 @@ export const mockVehicles: Vehicle[] = [
     brand: 'Librelato',
     model: 'Graneleira',
     year: 2019,
+    owner: {
+      name: 'Transportes Silva Ltda',
+      document: '12.345.678/0001-90',
+      phone: '(11) 3333-4444',
+      email: 'contato@transportessilva.com.br'
+    },
     createdAt: '2024-02-05T00:00:00Z',
     documents: [
       {
@@ -290,6 +302,12 @@ export const mockVehicles: Vehicle[] = [
     brand: 'Volvo',
     model: 'FH540',
     year: 2021,
+    owner: {
+      name: 'Maria Oliveira Costa',
+      document: '987.654.321-00',
+      phone: '(11) 99999-2222',
+      email: 'maria.oliveira@email.com'
+    },
     createdAt: '2024-03-15T00:00:00Z',
     documents: [
       {
@@ -345,6 +363,12 @@ export const mockVehicles: Vehicle[] = [
     brand: 'Mercedes',
     model: 'Actros',
     year: 2022,
+    owner: {
+      name: 'Logística Ferreira S.A.',
+      document: '98.765.432/0001-10',
+      phone: '(11) 4444-5555',
+      email: 'admin@logisticaferreira.com.br'
+    },
     createdAt: '2024-04-20T00:00:00Z',
     documents: [
       {

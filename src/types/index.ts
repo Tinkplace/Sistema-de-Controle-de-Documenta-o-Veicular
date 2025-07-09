@@ -29,6 +29,12 @@ export interface Vehicle {
   brand: string;
   model: string;
   year: number;
+  owner: {
+    name: string;
+    document: string; // CPF or CNPJ
+    phone: string;
+    email: string;
+  };
   createdAt: string;
   documents: VehicleDocument[];
 }
