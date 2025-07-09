@@ -22,8 +22,9 @@ const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange, notificationCou
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Truck className="h-8 w-8 text-blue-600 mr-3" />
-            <h1 className="text-xl font-bold text-gray-900">
-              Controle de Documentação Veicular
+            <h1 className="text-xl font-bold">
+              <span className="text-blue-700 font-black tracking-tight">BBM</span>
+              <span className="text-gray-800 font-semibold ml-1">SmartDocs</span>
             </h1>
           </div>
           
