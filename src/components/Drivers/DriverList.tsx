@@ -74,6 +74,12 @@ const DriverList: React.FC<DriverListProps> = ({
                       {/* Placas dos Veículos */}
                       {(driver.cavaloPlate || driver.carretaPlate) && (
                         <div className="flex items-center space-x-4 text-sm text-gray-600 mt-2">
+                          <div className="flex items-center bg-purple-50 px-2 py-1 rounded">
+                            <span className="text-purple-700 font-medium text-xs">
+                              {driver.linkType === 'agregado' ? 'Agregado' : 
+                               driver.linkType === 'frota' ? 'Frota' : 'Terceiro'}
+                            </span>
+                          </div>
                           {driver.cavaloPlate && (
                             <div className="flex items-center bg-blue-50 px-2 py-1 rounded">
                               <Truck className="h-3 w-3 mr-1 text-blue-600" />

@@ -80,6 +80,10 @@ const VehicleList: React.FC<VehicleListProps> = ({
                         }`}>
                           {getVehicleTypeLabel(vehicle.type)}
                         </span>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                          {vehicle.linkType === 'agregado' ? 'Agregado' : 
+                           vehicle.linkType === 'frota' ? 'Frota' : 'Terceiro'}
+                        </span>
                       </div>
                       <p className="text-sm text-gray-500 mt-1">
                         {vehicle.brand} {vehicle.model} - {vehicle.year}

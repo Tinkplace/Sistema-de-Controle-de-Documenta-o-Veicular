@@ -20,6 +20,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
   const [formData, setFormData] = useState({
     plate: vehicle?.plate || '',
     type: vehicle?.type || 'cavalo_mecanico' as const,
+    linkType: vehicle?.linkType || 'agregado' as const,
     brand: vehicle?.brand || '',
     model: vehicle?.model || '',
     year: vehicle?.year || new Date().getFullYear(),
@@ -329,6 +330,25 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
             </select>
           </div>
 
+          {/* Tipo de Vínculo */}
+          <div>
+            <label htmlFor="linkType" className="block text-sm font-medium text-gray-700 mb-2">
+              Tipo de Vínculo *
+            </label>
+            <select
+              id="linkType"
+              value={formData.linkType}
+              onChange={(e) => setFormData(prev => ({ ...prev, linkType: e.target.value as 'agregado' | 'frota' | 'terceiro' }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="agregado">Agregado</option>
+              <option value="frota">Frota</option>
+              <option value="terceiro">Terceiro</option>
+            </select>
+            <p className="mt-1 text-xs text-gray-600">
+              Agregado: Veículo de terceiro | Frota: Veículo próprio | Terceiro: Veículo parceiro
+            </p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Marca */}
             <div>

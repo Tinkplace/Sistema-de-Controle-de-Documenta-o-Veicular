@@ -21,6 +21,7 @@ const DriverForm: React.FC<DriverFormProps> = ({
     name: driver?.name || '',
     email: driver?.email || '',
     phone: driver?.phone || '',
+    linkType: driver?.linkType || 'agregado' as const,
     cavaloPlate: driver?.cavaloPlate || '',
     carretaPlate: driver?.carretaPlate || ''
   });
@@ -272,6 +273,35 @@ const DriverForm: React.FC<DriverFormProps> = ({
               )}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Tipo de Vínculo */}
+      <div className="bg-purple-50 p-6 rounded-lg border border-purple-200">
+        <h3 className="text-lg font-semibold text-purple-900 mb-4 flex items-center">
+          <User className="h-5 w-5 mr-2" />
+          Tipo de Vínculo
+        </h3>
+        
+        <div>
+          <label htmlFor="linkType" className="block text-sm font-medium text-gray-700 mb-2">
+            Classificação do Motorista *
+          </label>
+          <select
+            id="linkType"
+            value={formData.linkType}
+            onChange={(e) => setFormData(prev => ({ ...prev, linkType: e.target.value as 'agregado' | 'frota' | 'terceiro' }))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="agregado">Agregado</option>
+            <option value="frota">Frota</option>
+            <option value="terceiro">Terceiro</option>
+          </select>
+          <p className="mt-2 text-sm text-gray-600">
+            <strong>Agregado:</strong> Motorista autônomo vinculado à empresa<br />
+            <strong>Frota:</strong> Motorista funcionário da empresa<br />
+            <strong>Terceiro:</strong> Motorista de empresa parceira
+          </p>
         </div>
       </div>
 
