@@ -3,6 +3,7 @@ export interface Driver {
   name: string;
   email: string;
   phone: string;
+  linkType: 'agregado' | 'frota' | 'terceiro';
   cavaloPlate?: string;
   carretaPlate?: string;
   createdAt: string;
@@ -26,6 +27,7 @@ export interface Vehicle {
   id: string;
   plate: string;
   type: 'cavalo_mecanico' | 'reboque';
+  linkType: 'agregado' | 'frota' | 'terceiro';
   brand: string;
   model: string;
   year: number;
