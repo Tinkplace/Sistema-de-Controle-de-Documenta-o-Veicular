@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { Users, Truck, Clock, AlertTriangle, Bell, TruckIcon, PieChart, Edit } from 'lucide-react';
+import { Users, Truck, Clock, AlertTriangle, Bell, TruckIcon, PieChart, Edit, Download, Filter } from 'lucide-react';
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import StatsCard from './StatsCard';
 import Button from '../Common/Button';
 import { DashboardStats, Driver, Vehicle } from '../../types';
 import { formatDate, getDaysUntilExpiry, getStatusText, getDocumentTypeLabel } from '../../utils/documentHelpers';
-import { exportVehicleList } from '../../utils/exportHelpers';
+import { exportVehicleList, exportToPDF, DocumentExportData } from '../../utils/exportHelpers';
 
 interface DashboardProps {
   stats: DashboardStats;
@@ -23,6 +23,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   onEditVehicle 
 }) => {
   const [selectedVehicleType, setSelectedVehicleType] = useState<'cavalo_mecanico' | 'reboque' | null>(null);
+  const [showLinkTypeFilter, setShowLinkTypeFilter] = useState(false);
 
   // Calculate vehicle type stats
   const vehicleStats = useMemo(() => {
@@ -36,6 +37,23 @@ const Dashboard: React.FC<DashboardProps> = ({
       reboques
     };
   }, [vehicles]);
+
+  // Calculate link type stats
+  const linkTypeStats = useMemo(() => {
+    const driverStats = {
+      agregado: drivers.filter(d => d.linkType === 'agregado').length,
+      frota: drivers.filter(d => d.linkType === 'frota').length,
+      terceiro: drivers.filter(d => d.linkType === 'terceiro').length
+    };
+    
+    const vehicleStats = {
+      agregado: vehicles.filter(v => v.linkType === 'agregado').length,
+      frota: vehicles.filter(v => v.linkType === 'frota').length,
+      terceiro: vehicles.filter(v => v.linkType === 'terceiro').length
+    };
+    
+    return { drivers: driverStats, vehicles: vehicleStats };
+  }, [drivers, vehicles]);
 
   // Get all documents with enhanced information
   const getAllDocuments = () => {
@@ -89,6 +107,58 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   const handleExportVehicles = (type?: 'cavalo_mecanico' | 'reboque') => {
     exportVehicleList(vehicles, type);
+  };
+
+  const handleExportByLinkType = (linkType: 'agregado' | 'frota' | 'terceiro') => {
+    // Filter drivers and vehicles by link type
+    const filteredDrivers = drivers.filter(d => d.linkType === linkType);
+    const filteredVehicles = vehicles.filter(v => v.linkType === linkType);
+    
+    // Prepare export data
+    const exportData: DocumentExportData[] = [];
+    
+    // Add driver documents
+    filteredDrivers.forEach(driver => {
+      driver.documents.forEach(doc => {
+        exportData.push({
+          id: doc.id,
+          entityName: driver.name,
+          entityType: 'Motorista',
+          documentType: getDocumentTypeLabel(doc.type),
+          issueDate: doc.issueDate,
+          expiryDate: doc.expiryDate,
+          status: doc.status,
+          daysUntilExpiry: getDaysUntilExpiry(doc.expiryDate),
+          observations: doc.observations,
+          nome: driver.name,
+          placa: driver.cavaloPlate || driver.carretaPlate || '-'
+        });
+      });
+    });
+    
+    // Add vehicle documents
+    filteredVehicles.forEach(vehicle => {
+      vehicle.documents.forEach(doc => {
+        exportData.push({
+          id: doc.id,
+          entityName: `${vehicle.brand} ${vehicle.model} - ${vehicle.plate}`,
+          entityType: 'Veículo',
+          documentType: getDocumentTypeLabel(doc.type),
+          issueDate: doc.issueDate,
+          expiryDate: doc.expiryDate,
+          status: doc.status,
+          daysUntilExpiry: getDaysUntilExpiry(doc.expiryDate),
+          observations: doc.observations,
+          nome: `${vehicle.brand} ${vehicle.model}`,
+          placa: vehicle.plate
+        });
+      });
+    });
+    
+    const linkTypeLabel = linkType === 'agregado' ? 'Agregados' : 
+                         linkType === 'frota' ? 'Frota' : 'Terceiros';
+    
+    exportToPDF(exportData, `Relatório ${linkTypeLabel} - ${filteredDrivers.length} Motoristas e ${filteredVehicles.length} Veículos`);
   };
 
   const allDocuments = getAllDocuments();
@@ -148,6 +218,166 @@ const Dashboard: React.FC<DashboardProps> = ({
           icon={Bell}
           color="yellow"
         />
+      </div>
+
+      {/* Link Type Statistics and Reports */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+              <Filter className="h-5 w-5 text-purple-600 mr-2" />
+              Relatórios por Tipo de Vínculo
+            </h3>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowLinkTypeFilter(!showLinkTypeFilter)}
+            >
+              {showLinkTypeFilter ? 'Ocultar' : 'Mostrar'} Filtros
+            </Button>
+          </div>
+        </div>
+        
+        {showLinkTypeFilter && (
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Agregados */}
+              <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-md font-semibold text-purple-900">Agregados</h4>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleExportByLinkType('agregado')}
+                    icon={Download}
+                    disabled={linkTypeStats.drivers.agregado === 0 && linkTypeStats.vehicles.agregado === 0}
+                  >
+                    PDF
+                  </Button>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-purple-700">Motoristas:</span>
+                    <span className="font-semibold text-purple-900">{linkTypeStats.drivers.agregado}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-purple-700">Veículos:</span>
+                    <span className="font-semibold text-purple-900">{linkTypeStats.vehicles.agregado}</span>
+                  </div>
+                  <div className="pt-2 border-t border-purple-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-purple-800 font-medium">Total:</span>
+                      <span className="font-bold text-purple-900">
+                        {linkTypeStats.drivers.agregado + linkTypeStats.vehicles.agregado}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Frota */}
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-md font-semibold text-blue-900">Frota</h4>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleExportByLinkType('frota')}
+                    icon={Download}
+                    disabled={linkTypeStats.drivers.frota === 0 && linkTypeStats.vehicles.frota === 0}
+                  >
+                    PDF
+                  </Button>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-blue-700">Motoristas:</span>
+                    <span className="font-semibold text-blue-900">{linkTypeStats.drivers.frota}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-blue-700">Veículos:</span>
+                    <span className="font-semibold text-blue-900">{linkTypeStats.vehicles.frota}</span>
+                  </div>
+                  <div className="pt-2 border-t border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-blue-800 font-medium">Total:</span>
+                      <span className="font-bold text-blue-900">
+                        {linkTypeStats.drivers.frota + linkTypeStats.vehicles.frota}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Terceiros */}
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-md font-semibold text-green-900">Terceiros</h4>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleExportByLinkType('terceiro')}
+                    icon={Download}
+                    disabled={linkTypeStats.drivers.terceiro === 0 && linkTypeStats.vehicles.terceiro === 0}
+                  >
+                    PDF
+                  </Button>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-green-700">Motoristas:</span>
+                    <span className="font-semibold text-green-900">{linkTypeStats.drivers.terceiro}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-green-700">Veículos:</span>
+                    <span className="font-semibold text-green-900">{linkTypeStats.vehicles.terceiro}</span>
+                  </div>
+                  <div className="pt-2 border-t border-green-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-green-800 font-medium">Total:</span>
+                      <span className="font-bold text-green-900">
+                        {linkTypeStats.drivers.terceiro + linkTypeStats.vehicles.terceiro}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Summary */}
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h5 className="text-sm font-semibold text-gray-900 mb-3">Resumo Geral</h5>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">
+                      {drivers.length}
+                    </div>
+                    <div className="text-gray-600">Total Motoristas</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">
+                      {vehicles.length}
+                    </div>
+                    <div className="text-gray-600">Total Veículos</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">
+                      {drivers.length + vehicles.length}
+                    </div>
+                    <div className="text-gray-600">Total Geral</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">
+                      {allDocuments.length}
+                    </div>
+                    <div className="text-gray-600">Total Documentos</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Vehicle Details Modal/Section */}

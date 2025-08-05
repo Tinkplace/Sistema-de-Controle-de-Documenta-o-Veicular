@@ -12,6 +12,7 @@ interface DocumentFilterProps {
 
 interface FilterState {
   status: DocumentStatus[];
+  linkType: ('agregado' | 'frota' | 'terceiro')[];
   searchTerm: string;
   sortBy: 'expiryDate' | 'entityName' | 'documentType';
   sortOrder: 'asc' | 'desc';
@@ -35,6 +36,7 @@ const ITEMS_PER_PAGE = 6;
 const DocumentFilter: React.FC<DocumentFilterProps> = ({ drivers, vehicles }) => {
   const [filters, setFilters] = useState<FilterState>({
     status: [],
+    linkType: [],
     searchTerm: '',
     sortBy: 'expiryDate',
     sortOrder: 'asc'
@@ -87,6 +89,20 @@ const DocumentFilter: React.FC<DocumentFilterProps> = ({ drivers, vehicles }) =>
       filtered = filtered.filter(doc => filters.status.includes(doc.status));
     }
 
+    // Apply link type filter
+    if (filters.linkType.length > 0) {
+      filtered = filtered.filter(doc => {
+        // Find the entity (driver or vehicle) and check its linkType
+        if (doc.entityType === 'Motorista') {
+          const driver = drivers.find(d => d.name === doc.entityName);
+          return driver && filters.linkType.includes(driver.linkType);
+        } else {
+          const vehicle = vehicles.find(v => `${v.brand} ${v.model} - ${v.plate}` === doc.entityName);
+          return vehicle && filters.linkType.includes(vehicle.linkType);
+        }
+      });
+    }
+
     // Apply search filter
     if (filters.searchTerm) {
       const searchLower = filters.searchTerm.toLowerCase();
@@ -136,6 +152,16 @@ const DocumentFilter: React.FC<DocumentFilterProps> = ({ drivers, vehicles }) =>
     setCurrentPage(1);
   };
 
+  const handleLinkTypeToggle = (linkType: 'agregado' | 'frota' | 'terceiro') => {
+    setFilters(prev => ({
+      ...prev,
+      linkType: prev.linkType.includes(linkType)
+        ? prev.linkType.filter(l => l !== linkType)
+        : [...prev.linkType, linkType]
+    }));
+    setCurrentPage(1);
+  };
+
   const handleSearch = async () => {
     setIsSearching(true);
     // Simulate search delay for better UX
@@ -147,6 +173,7 @@ const DocumentFilter: React.FC<DocumentFilterProps> = ({ drivers, vehicles }) =>
   const clearFilters = () => {
     setFilters({
       status: [],
+      linkType: [],
       searchTerm: '',
       sortBy: 'expiryDate',
       sortOrder: 'asc'
@@ -236,7 +263,49 @@ const DocumentFilter: React.FC<DocumentFilterProps> = ({ drivers, vehicles }) =>
       </div>
 
       {/* Filter Panel */}
+          {/* Link Type Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Tipo de Vínculo
+            </label>
+            <div className="space-y-2">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={filters.linkType.includes('agregado')}
+                  onChange={() => handleLinkTypeToggle('agregado')}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-300">
+                  Agregado
+                </span>
+              </label>
+              
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={filters.linkType.includes('frota')}
+                  onChange={() => handleLinkTypeToggle('frota')}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-300">
+                  Frota
+                </span>
+              </label>
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={filters.linkType.includes('terceiro')}
+                  onChange={() => handleLinkTypeToggle('terceiro')}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-300">
+                  Terceiro
+                </span>
+              </label>
+            </div>
+          </div>
         <div className="space-y-6">
           {/* Search Bar */}
           <div>
@@ -384,9 +453,9 @@ const DocumentFilter: React.FC<DocumentFilterProps> = ({ drivers, vehicles }) =>
               <span>
                 {filteredDocuments.length} documento{filteredDocuments.length !== 1 ? 's' : ''} encontrado{filteredDocuments.length !== 1 ? 's' : ''}
               </span>
-              {filters.status.length > 0 || filters.searchTerm ? (
+              {filters.status.length > 0 || filters.linkType.length > 0 || filters.searchTerm ? (
                 <span className="text-blue-600 font-medium">
-                  {filters.status.length + (filters.searchTerm ? 1 : 0)} filtro{filters.status.length + (filters.searchTerm ? 1 : 0) !== 1 ? 's' : ''} ativo{filters.status.length + (filters.searchTerm ? 1 : 0) !== 1 ? 's' : ''}
+                  {filters.status.length + filters.linkType.length + (filters.searchTerm ? 1 : 0)} filtro{filters.status.length + filters.linkType.length + (filters.searchTerm ? 1 : 0) !== 1 ? 's' : ''} ativo{filters.status.length + filters.linkType.length + (filters.searchTerm ? 1 : 0) !== 1 ? 's' : ''}
                 </span>
               ) : (
                 <span className="text-gray-400">Nenhum filtro aplicado</span>
