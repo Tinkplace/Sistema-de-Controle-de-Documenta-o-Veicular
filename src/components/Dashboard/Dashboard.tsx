@@ -47,9 +47,21 @@ const Dashboard: React.FC<DashboardProps> = ({
     };
     
     const vehicleStats = {
-      agregado: vehicles.filter(v => v.linkType === 'agregado').length,
-      frota: vehicles.filter(v => v.linkType === 'frota').length,
-      terceiro: vehicles.filter(v => v.linkType === 'terceiro').length
+      agregado: {
+        cavalo: vehicles.filter(v => v.linkType === 'agregado' && v.type === 'cavalo_mecanico').length,
+        carreta: vehicles.filter(v => v.linkType === 'agregado' && v.type === 'reboque').length,
+        total: vehicles.filter(v => v.linkType === 'agregado').length
+      },
+      frota: {
+        cavalo: vehicles.filter(v => v.linkType === 'frota' && v.type === 'cavalo_mecanico').length,
+        carreta: vehicles.filter(v => v.linkType === 'frota' && v.type === 'reboque').length,
+        total: vehicles.filter(v => v.linkType === 'frota').length
+      },
+      terceiro: {
+        cavalo: vehicles.filter(v => v.linkType === 'terceiro' && v.type === 'cavalo_mecanico').length,
+        carreta: vehicles.filter(v => v.linkType === 'terceiro' && v.type === 'reboque').length,
+        total: vehicles.filter(v => v.linkType === 'terceiro').length
+      }
     };
     
     return { drivers: driverStats, vehicles: vehicleStats };
@@ -250,7 +262,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                     size="sm"
                     onClick={() => handleExportByLinkType('agregado')}
                     icon={Download}
-                    disabled={linkTypeStats.drivers.agregado === 0 && linkTypeStats.vehicles.agregado === 0}
+                    disabled={linkTypeStats.drivers.agregado === 0 && linkTypeStats.vehicles.agregado.total === 0}
                   >
                     PDF
                   </Button>
@@ -261,14 +273,18 @@ const Dashboard: React.FC<DashboardProps> = ({
                     <span className="font-semibold text-purple-900">{linkTypeStats.drivers.agregado}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-purple-700">Veículos:</span>
-                    <span className="font-semibold text-purple-900">{linkTypeStats.vehicles.agregado}</span>
+                    <span className="text-purple-700">Cavalo:</span>
+                    <span className="font-semibold text-purple-900">{linkTypeStats.vehicles.agregado.cavalo}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-purple-700">Carreta:</span>
+                    <span className="font-semibold text-purple-900">{linkTypeStats.vehicles.agregado.carreta}</span>
                   </div>
                   <div className="pt-2 border-t border-purple-200">
                     <div className="flex items-center justify-between">
                       <span className="text-purple-800 font-medium">Total:</span>
                       <span className="font-bold text-purple-900">
-                        {linkTypeStats.drivers.agregado + linkTypeStats.vehicles.agregado}
+                        {linkTypeStats.drivers.agregado + linkTypeStats.vehicles.agregado.total}
                       </span>
                     </div>
                   </div>
@@ -284,7 +300,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                     size="sm"
                     onClick={() => handleExportByLinkType('frota')}
                     icon={Download}
-                    disabled={linkTypeStats.drivers.frota === 0 && linkTypeStats.vehicles.frota === 0}
+                    disabled={linkTypeStats.drivers.frota === 0 && linkTypeStats.vehicles.frota.total === 0}
                   >
                     PDF
                   </Button>
@@ -295,14 +311,18 @@ const Dashboard: React.FC<DashboardProps> = ({
                     <span className="font-semibold text-blue-900">{linkTypeStats.drivers.frota}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-blue-700">Veículos:</span>
-                    <span className="font-semibold text-blue-900">{linkTypeStats.vehicles.frota}</span>
+                    <span className="text-blue-700">Cavalo:</span>
+                    <span className="font-semibold text-blue-900">{linkTypeStats.vehicles.frota.cavalo}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-blue-700">Carreta:</span>
+                    <span className="font-semibold text-blue-900">{linkTypeStats.vehicles.frota.carreta}</span>
                   </div>
                   <div className="pt-2 border-t border-blue-200">
                     <div className="flex items-center justify-between">
                       <span className="text-blue-800 font-medium">Total:</span>
                       <span className="font-bold text-blue-900">
-                        {linkTypeStats.drivers.frota + linkTypeStats.vehicles.frota}
+                        {linkTypeStats.drivers.frota + linkTypeStats.vehicles.frota.total}
                       </span>
                     </div>
                   </div>
@@ -318,7 +338,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                     size="sm"
                     onClick={() => handleExportByLinkType('terceiro')}
                     icon={Download}
-                    disabled={linkTypeStats.drivers.terceiro === 0 && linkTypeStats.vehicles.terceiro === 0}
+                    disabled={linkTypeStats.drivers.terceiro === 0 && linkTypeStats.vehicles.terceiro.total === 0}
                   >
                     PDF
                   </Button>
@@ -329,14 +349,18 @@ const Dashboard: React.FC<DashboardProps> = ({
                     <span className="font-semibold text-green-900">{linkTypeStats.drivers.terceiro}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-green-700">Veículos:</span>
-                    <span className="font-semibold text-green-900">{linkTypeStats.vehicles.terceiro}</span>
+                    <span className="text-green-700">Cavalo:</span>
+                    <span className="font-semibold text-green-900">{linkTypeStats.vehicles.terceiro.cavalo}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-green-700">Carreta:</span>
+                    <span className="font-semibold text-green-900">{linkTypeStats.vehicles.terceiro.carreta}</span>
                   </div>
                   <div className="pt-2 border-t border-green-200">
                     <div className="flex items-center justify-between">
                       <span className="text-green-800 font-medium">Total:</span>
                       <span className="font-bold text-green-900">
-                        {linkTypeStats.drivers.terceiro + linkTypeStats.vehicles.terceiro}
+                        {linkTypeStats.drivers.terceiro + linkTypeStats.vehicles.terceiro.total}
                       </span>
                     </div>
                   </div>
@@ -357,13 +381,13 @@ const Dashboard: React.FC<DashboardProps> = ({
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-900">
-                      {vehicles.length}
+                      {linkTypeStats.vehicles.agregado.total + linkTypeStats.vehicles.frota.total + linkTypeStats.vehicles.terceiro.total}
                     </div>
                     <div className="text-gray-600">Total Veículos</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-900">
-                      {drivers.length + vehicles.length}
+                      {drivers.length + linkTypeStats.vehicles.agregado.total + linkTypeStats.vehicles.frota.total + linkTypeStats.vehicles.terceiro.total}
                     </div>
                     <div className="text-gray-600">Total Geral</div>
                   </div>
