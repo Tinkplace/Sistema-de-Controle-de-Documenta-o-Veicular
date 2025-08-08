@@ -5,7 +5,7 @@ import StatsCard from './StatsCard';
 import Button from '../Common/Button';
 import { DashboardStats, Driver, Vehicle } from '../../types';
 import { formatDate, getDaysUntilExpiry, getStatusText, getDocumentTypeLabel } from '../../utils/documentHelpers';
-import { exportVehicleList, exportToPDF, DocumentExportData } from '../../utils/exportHelpers';
+import { exportVehicleList, exportToPDF, exportLinkTypeReport, DocumentExportData } from '../../utils/exportHelpers';
 
 interface DashboardProps {
   stats: DashboardStats;
@@ -122,55 +122,8 @@ const Dashboard: React.FC<DashboardProps> = ({
   };
 
   const handleExportByLinkType = (linkType: 'agregado' | 'frota' | 'terceiro') => {
-    // Filter drivers and vehicles by link type
-    const filteredDrivers = drivers.filter(d => d.linkType === linkType);
-    const filteredVehicles = vehicles.filter(v => v.linkType === linkType);
-    
-    // Prepare export data
-    const exportData: DocumentExportData[] = [];
-    
-    // Add driver documents
-    filteredDrivers.forEach(driver => {
-      driver.documents.forEach(doc => {
-        exportData.push({
-          id: doc.id,
-          entityName: driver.name,
-          entityType: 'Motorista',
-          documentType: getDocumentTypeLabel(doc.type),
-          issueDate: doc.issueDate,
-          expiryDate: doc.expiryDate,
-          status: doc.status,
-          daysUntilExpiry: getDaysUntilExpiry(doc.expiryDate),
-          observations: doc.observations,
-          nome: driver.name,
-          placa: driver.cavaloPlate || driver.carretaPlate || '-'
-        });
-      });
-    });
-    
-    // Add vehicle documents
-    filteredVehicles.forEach(vehicle => {
-      vehicle.documents.forEach(doc => {
-        exportData.push({
-          id: doc.id,
-          entityName: `${vehicle.brand} ${vehicle.model} - ${vehicle.plate}`,
-          entityType: 'Veículo',
-          documentType: getDocumentTypeLabel(doc.type),
-          issueDate: doc.issueDate,
-          expiryDate: doc.expiryDate,
-          status: doc.status,
-          daysUntilExpiry: getDaysUntilExpiry(doc.expiryDate),
-          observations: doc.observations,
-          nome: `${vehicle.brand} ${vehicle.model}`,
-          placa: vehicle.plate
-        });
-      });
-    });
-    
-    const linkTypeLabel = linkType === 'agregado' ? 'Agregados' : 
-                         linkType === 'frota' ? 'Frota' : 'Terceiros';
-    
-    exportToPDF(exportData, `Relatório ${linkTypeLabel} - ${filteredDrivers.length} Motoristas e ${filteredVehicles.length} Veículos`);
+    // Use the new specific export function for link type reports
+    exportLinkTypeReport(drivers, linkType);
   };
 
   const allDocuments = getAllDocuments();

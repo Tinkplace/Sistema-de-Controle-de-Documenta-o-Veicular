@@ -181,3 +181,71 @@ export const exportVehicleList = (vehicles: any[], type?: 'cavalo_mecanico' | 'r
   // Save the file
   XLSX.writeFile(wb, `${title.toLowerCase().replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`);
 };
+
+export const exportLinkTypeReport = (drivers: any[], linkType: 'agregado' | 'frota' | 'terceiro') => {
+  const doc = new jsPDF();
+  
+  // Filter drivers by link type
+  const filteredDrivers = drivers.filter(d => d.linkType === linkType);
+  
+  // Title mapping
+  const linkTypeLabels = {
+    agregado: 'Agregados',
+    frota: 'Frota Própria',
+    terceiro: 'Terceiros'
+  };
+  
+  const title = `Relatório de ${linkTypeLabels[linkType]}`;
+  
+  // Add title
+  doc.setFontSize(16);
+  doc.text(title, 14, 22);
+  
+  // Add generation date
+  doc.setFontSize(10);
+  doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 30);
+  
+  // Add summary
+  doc.text(`Total de motoristas: ${filteredDrivers.length}`, 14, 38);
+  
+  if (filteredDrivers.length === 0) {
+    doc.setFontSize(12);
+    doc.text('Nenhum motorista encontrado para este tipo de vínculo.', 14, 50);
+  } else {
+    // Prepare table data with only the 3 required fields
+    const tableData = filteredDrivers.map(driver => [
+      driver.name || '-',
+      driver.cavaloPlate || '-',
+      driver.carretaPlate || '-'
+    ]);
+    
+    // Add table with only 3 columns as specified
+    autoTable(doc, {
+      head: [['Nome do Motorista', 'Placa do Cavalo', 'Placa da Carreta']],
+      body: tableData,
+      startY: 45,
+      styles: { 
+        fontSize: 10,
+        cellPadding: 4
+      },
+      headStyles: { 
+        fillColor: [59, 130, 246],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold'
+      },
+      alternateRowStyles: { 
+        fillColor: [249, 250, 251] 
+      },
+      columnStyles: {
+        0: { cellWidth: 70 }, // Nome do Motorista
+        1: { cellWidth: 35 }, // Placa do Cavalo
+        2: { cellWidth: 35 }  // Placa da Carreta
+      },
+      margin: { left: 14, right: 14 }
+    });
+  }
+  
+  // Save the PDF
+  const fileName = `relatorio_${linkType}_${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(fileName);
+};
