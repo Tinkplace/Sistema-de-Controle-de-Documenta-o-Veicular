@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { AuthProvider } from './contexts/AuthContext';
+import AuthWrapper from './components/Auth/AuthWrapper';
 import Header from './components/Layout/Header';
 import Dashboard from './components/Dashboard/Dashboard';
 import DriverList from './components/Drivers/DriverList';
@@ -143,67 +145,71 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header 
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        notificationCount={notifications.filter(n => n.status === 'pending').length}
-      />
-      
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        {loading && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-center mt-2">Carregando...</p>
-            </div>
-          </div>
-        )}
-        {renderContent()}
-      </main>
+    <AuthProvider>
+      <AuthWrapper>
+        <div className="min-h-screen bg-gray-50">
+          <Header 
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            notificationCount={notifications.filter(n => n.status === 'pending').length}
+          />
+          
+          <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            {loading && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white p-6 rounded-lg">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="text-center mt-2">Carregando...</p>
+                </div>
+              </div>
+            )}
+            {renderContent()}
+          </main>
 
-      {/* Driver Modal */}
-      <Modal
-        isOpen={showDriverModal}
-        onClose={() => {
-          setShowDriverModal(false);
-          setEditingDriver(null);
-        }}
-        title={editingDriver ? 'Editar Motorista' : 'Novo Motorista'}
-        size="lg"
-      >
-        <DriverForm
-          driver={editingDriver || undefined}
-          onSave={handleSaveDriver}
-          onCancel={() => {
-            setShowDriverModal(false);
-            setEditingDriver(null);
-          }}
-          loading={loading}
-        />
-      </Modal>
+          {/* Driver Modal */}
+          <Modal
+            isOpen={showDriverModal}
+            onClose={() => {
+              setShowDriverModal(false);
+              setEditingDriver(null);
+            }}
+            title={editingDriver ? 'Editar Motorista' : 'Novo Motorista'}
+            size="lg"
+          >
+            <DriverForm
+              driver={editingDriver || undefined}
+              onSave={handleSaveDriver}
+              onCancel={() => {
+                setShowDriverModal(false);
+                setEditingDriver(null);
+              }}
+              loading={loading}
+            />
+          </Modal>
 
-      {/* Vehicle Modal */}
-      <Modal
-        isOpen={showVehicleModal}
-        onClose={() => {
-          setShowVehicleModal(false);
-          setEditingVehicle(null);
-        }}
-        title={editingVehicle ? 'Editar Veículo' : 'Novo Veículo'}
-        size="lg"
-      >
-        <VehicleForm
-          vehicle={editingVehicle || undefined}
-          onSave={handleSaveVehicle}
-          onCancel={() => {
-            setShowVehicleModal(false);
-            setEditingVehicle(null);
-          }}
-          loading={loading}
-        />
-      </Modal>
-    </div>
+          {/* Vehicle Modal */}
+          <Modal
+            isOpen={showVehicleModal}
+            onClose={() => {
+              setShowVehicleModal(false);
+              setEditingVehicle(null);
+            }}
+            title={editingVehicle ? 'Editar Veículo' : 'Novo Veículo'}
+            size="lg"
+          >
+            <VehicleForm
+              vehicle={editingVehicle || undefined}
+              onSave={handleSaveVehicle}
+              onCancel={() => {
+                setShowVehicleModal(false);
+                setEditingVehicle(null);
+              }}
+              loading={loading}
+            />
+          </Modal>
+        </div>
+      </AuthWrapper>
+    </AuthProvider>
   );
 }
 
