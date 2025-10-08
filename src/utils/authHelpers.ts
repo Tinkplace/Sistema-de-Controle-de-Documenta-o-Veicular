@@ -3,7 +3,6 @@
 // ===================================================================
 
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import CryptoJS from 'crypto-js';
 import { User, LoginAttempt, SECURITY_CONFIG } from '../types/auth';
 
@@ -83,23 +82,58 @@ export const validateEmail = (email: string): boolean => {
 };
 
 /**
- * Gera token JWT para sessão
+ * Gera token JWT para sessão (implementação compatível com navegador)
  */
 export const generateJWT = (userId: string): string => {
-  return jwt.sign(
-    { userId, timestamp: Date.now() },
-    SECURITY_CONFIG.JWT_SECRET,
-    { expiresIn: '24h' }
-  );
+  const header = { alg: 'HS256', typ: 'JWT' };
+  const payload = {
+    userId,
+    timestamp: Date.now(),
+    exp: Date.now() + (24 * 60 * 60 * 1000) // 24 horas
+  };
+
+  const encodedHeader = btoa(JSON.stringify(header));
+  const encodedPayload = btoa(JSON.stringify(payload));
+
+  const signature = CryptoJS.HmacSHA256(
+    `${encodedHeader}.${encodedPayload}`,
+    SECURITY_CONFIG.JWT_SECRET
+  ).toString();
+
+  return `${encodedHeader}.${encodedPayload}.${signature}`;
 };
 
 /**
- * Verifica e decodifica token JWT
+ * Verifica e decodifica token JWT (implementação compatível com navegador)
  */
 export const verifyJWT = (token: string): { userId: string; timestamp: number } | null => {
   try {
-    const decoded = jwt.verify(token, SECURITY_CONFIG.JWT_SECRET) as any;
-    return { userId: decoded.userId, timestamp: decoded.timestamp };
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return null;
+    }
+
+    const [encodedHeader, encodedPayload, signature] = parts;
+
+    // Verifica assinatura
+    const expectedSignature = CryptoJS.HmacSHA256(
+      `${encodedHeader}.${encodedPayload}`,
+      SECURITY_CONFIG.JWT_SECRET
+    ).toString();
+
+    if (signature !== expectedSignature) {
+      return null;
+    }
+
+    // Decodifica payload
+    const payload = JSON.parse(atob(encodedPayload));
+
+    // Verifica expiração
+    if (payload.exp && Date.now() > payload.exp) {
+      return null;
+    }
+
+    return { userId: payload.userId, timestamp: payload.timestamp };
   } catch (error) {
     return null;
   }
