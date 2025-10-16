@@ -88,7 +88,22 @@ const VehicleList: React.FC<VehicleListProps> = ({
                       <p className="text-sm text-gray-500 mt-1">
                         {vehicle.brand} {vehicle.model} - {vehicle.year}
                       </p>
-                     
+
+                      {/* Permisso Information */}
+                      {vehicle.permisso && vehicle.permisso.transportadora && (
+                        <div className="mt-2 bg-yellow-50 border border-yellow-200 rounded px-2 py-1 inline-block">
+                          <p className="text-xs text-yellow-800">
+                            <FileText className="h-3 w-3 inline mr-1" />
+                            <strong>Permisso:</strong> {vehicle.permisso.transportadora}
+                            {vehicle.permisso.expiryDate && (
+                              <span className="ml-2">
+                                | Vence: {formatDate(vehicle.permisso.expiryDate)}
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      )}
+
                      {/* Owner Information */}
                      <div className="flex items-center space-x-4 text-xs text-gray-500 mt-2">
                        <div className="flex items-center">

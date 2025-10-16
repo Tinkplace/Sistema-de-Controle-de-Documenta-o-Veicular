@@ -29,6 +29,10 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
       document: vehicle?.owner?.document || '',
       phone: vehicle?.owner?.phone || '',
       email: vehicle?.owner?.email || ''
+    },
+    permisso: {
+      transportadora: vehicle?.permisso?.transportadora || '',
+      expiryDate: vehicle?.permisso?.expiryDate || ''
     }
   });
 
@@ -180,11 +184,18 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
         }
       });
 
-      onSave({
+      const vehicleData: any = {
         ...formData,
         plate: formData.plate.toUpperCase(),
         documents: vehicleDocuments
-      });
+      };
+
+      // Adiciona permisso apenas se tiver dados preenchidos
+      if (formData.permisso.transportadora && formData.permisso.expiryDate) {
+        vehicleData.permisso = formData.permisso;
+      }
+
+      onSave(vehicleData);
     }
   };
 
@@ -410,6 +421,53 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
                 <p className="mt-1 text-sm text-red-600">{errors.year}</p>
               )}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Permisso Mercosul */}
+      <div className="bg-yellow-50 p-6 rounded-lg border-2 border-yellow-300">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <FileText className="h-5 w-5 mr-2 text-yellow-600" />
+          Permisso Mercosul
+        </h3>
+        <p className="text-sm text-gray-600 mb-4">
+          Licença para transporte de carga no Mercosul
+        </p>
+
+        <div className="grid gap-4">
+          <div>
+            <label htmlFor="transportadora" className="block text-sm font-medium text-gray-700 mb-2">
+              Transportadora Vinculada
+            </label>
+            <input
+              type="text"
+              id="transportadora"
+              value={formData.permisso.transportadora}
+              onChange={(e) => setFormData(prev => ({
+                ...prev,
+                permisso: { ...prev.permisso, transportadora: e.target.value }
+              }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+              placeholder="Nome da transportadora"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="permissoExpiry" className="block text-sm font-medium text-gray-700 mb-2">
+              <Calendar className="h-4 w-4 inline mr-1" />
+              Data de Vencimento do Permisso
+            </label>
+            <input
+              type="date"
+              id="permissoExpiry"
+              value={formData.permisso.expiryDate}
+              onChange={(e) => setFormData(prev => ({
+                ...prev,
+                permisso: { ...prev.permisso, expiryDate: e.target.value }
+              }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+            />
           </div>
         </div>
       </div>

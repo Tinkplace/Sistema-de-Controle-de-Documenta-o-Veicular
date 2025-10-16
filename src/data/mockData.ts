@@ -180,6 +180,10 @@ export const mockVehicles: Vehicle[] = [
       phone: '(11) 99999-1111',
       email: 'joao.silva@email.com'
     },
+    permisso: {
+      transportadora: 'Transportadora Silva & Cia Ltda',
+      expiryDate: '2025-06-30'
+    },
     createdAt: '2024-01-20T00:00:00Z',
     documents: [
       {
@@ -264,6 +268,10 @@ export const mockVehicles: Vehicle[] = [
       phone: '(11) 3333-4444',
       email: 'contato@transportessilva.com.br'
     },
+    permisso: {
+      transportadora: 'Transportadora Silva & Cia Ltda',
+      expiryDate: '2024-12-20'
+    },
     createdAt: '2024-02-05T00:00:00Z',
     documents: [
       {
@@ -314,6 +322,10 @@ export const mockVehicles: Vehicle[] = [
       document: '987.654.321-00',
       phone: '(11) 99999-2222',
       email: 'maria.oliveira@email.com'
+    },
+    permisso: {
+      transportadora: 'BBM Transportes Rodoviários',
+      expiryDate: '2025-03-15'
     },
     createdAt: '2024-03-15T00:00:00Z',
     documents: [

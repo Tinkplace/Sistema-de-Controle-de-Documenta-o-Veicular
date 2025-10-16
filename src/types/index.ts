@@ -37,6 +37,10 @@ export interface Vehicle {
     phone: string;
     email: string;
   };
+  permisso?: {
+    transportadora: string;
+    expiryDate: string;
+  };
   createdAt: string;
   documents: VehicleDocument[];
 }
