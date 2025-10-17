@@ -238,44 +238,45 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
   };
 
   const handleDocumentChange = (value: string) => {
+    // Remove todos os caracteres não numéricos
     const digits = value.replace(/\D/g, '');
-    
+
+    // Limita a 14 dígitos (CNPJ)
+    const limitedDigits = digits.slice(0, 14);
+
     let formatted = '';
-    if (digits.length <= 11) {
+
+    if (limitedDigits.length <= 11) {
       // CPF format: 123.456.789-01
-      if (digits.length >= 3) {
-        formatted = digits.slice(0, 3);
-        if (digits.length >= 6) {
-          formatted += '.' + digits.slice(3, 6);
-          if (digits.length >= 9) {
-            formatted += '.' + digits.slice(6, 9);
-            if (digits.length >= 11) {
-              formatted += '-' + digits.slice(9, 11);
-            }
-          }
-        }
-      } else {
-        formatted = digits;
+      formatted = limitedDigits;
+      if (limitedDigits.length > 3) {
+        formatted = limitedDigits.slice(0, 3) + '.' + limitedDigits.slice(3);
+      }
+      if (limitedDigits.length > 6) {
+        formatted = limitedDigits.slice(0, 3) + '.' + limitedDigits.slice(3, 6) + '.' + limitedDigits.slice(6);
+      }
+      if (limitedDigits.length > 9) {
+        formatted = limitedDigits.slice(0, 3) + '.' + limitedDigits.slice(3, 6) + '.' + limitedDigits.slice(6, 9) + '-' + limitedDigits.slice(9, 11);
       }
     } else {
       // CNPJ format: 12.345.678/0001-90
-      formatted = digits.slice(0, 2);
-      if (digits.length >= 5) {
-        formatted += '.' + digits.slice(2, 5);
-        if (digits.length >= 8) {
-          formatted += '.' + digits.slice(5, 8);
-          if (digits.length >= 12) {
-            formatted += '/' + digits.slice(8, 12);
-            if (digits.length >= 14) {
-              formatted += '-' + digits.slice(12, 14);
-            }
-          }
-        }
+      formatted = limitedDigits;
+      if (limitedDigits.length > 2) {
+        formatted = limitedDigits.slice(0, 2) + '.' + limitedDigits.slice(2);
+      }
+      if (limitedDigits.length > 5) {
+        formatted = limitedDigits.slice(0, 2) + '.' + limitedDigits.slice(2, 5) + '.' + limitedDigits.slice(5);
+      }
+      if (limitedDigits.length > 8) {
+        formatted = limitedDigits.slice(0, 2) + '.' + limitedDigits.slice(2, 5) + '.' + limitedDigits.slice(5, 8) + '/' + limitedDigits.slice(8);
+      }
+      if (limitedDigits.length > 12) {
+        formatted = limitedDigits.slice(0, 2) + '.' + limitedDigits.slice(2, 5) + '.' + limitedDigits.slice(5, 8) + '/' + limitedDigits.slice(8, 12) + '-' + limitedDigits.slice(12, 14);
       }
     }
-    
-    setFormData(prev => ({ 
-      ...prev, 
+
+    setFormData(prev => ({
+      ...prev,
       owner: { ...prev.owner, document: formatted }
     }));
   };
