@@ -758,7 +758,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
                   <input
                     type="date"
                     value={documents.relatorio_opacidade?.issueDate || ''}
-                    onChange={(e) => handleDocumentChange('relatorio_opacidade', 'issueDate', e.target.value)}
+                    onChange={(e) => handleVehicleDocumentChange('relatorio_opacidade', 'issueDate', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -771,7 +771,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
                   <input
                     type="date"
                     value={documents.relatorio_opacidade?.expiryDate || ''}
-                    onChange={(e) => handleDocumentChange('relatorio_opacidade', 'expiryDate', e.target.value)}
+                    onChange={(e) => handleVehicleDocumentChange('relatorio_opacidade', 'expiryDate', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -786,7 +786,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
                 </label>
                 <textarea
                   value={documents.relatorio_opacidade?.observations || ''}
-                  onChange={(e) => handleDocumentChange('relatorio_opacidade', 'observations', e.target.value)}
+                  onChange={(e) => handleVehicleDocumentChange('relatorio_opacidade', 'observations', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   rows={2}
                   placeholder="Informações adicionais sobre o laudo de opacidade"
@@ -810,7 +810,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
                   <input
                     type="date"
                     value={documents.relatorio_ruido?.issueDate || ''}
-                    onChange={(e) => handleDocumentChange('relatorio_ruido', 'issueDate', e.target.value)}
+                    onChange={(e) => handleVehicleDocumentChange('relatorio_ruido', 'issueDate', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -823,7 +823,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
                   <input
                     type="date"
                     value={documents.relatorio_ruido?.expiryDate || ''}
-                    onChange={(e) => handleDocumentChange('relatorio_ruido', 'expiryDate', e.target.value)}
+                    onChange={(e) => handleVehicleDocumentChange('relatorio_ruido', 'expiryDate', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -838,7 +838,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
                 </label>
                 <textarea
                   value={documents.relatorio_ruido?.observations || ''}
-                  onChange={(e) => handleDocumentChange('relatorio_ruido', 'observations', e.target.value)}
+                  onChange={(e) => handleVehicleDocumentChange('relatorio_ruido', 'observations', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   rows={2}
                   placeholder="Informações adicionais sobre o laudo de ruído"
@@ -862,7 +862,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
                   <input
                     type="date"
                     value={documents.tacografo?.issueDate || ''}
-                    onChange={(e) => handleDocumentChange('tacografo', 'issueDate', e.target.value)}
+                    onChange={(e) => handleVehicleDocumentChange('tacografo', 'issueDate', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -875,7 +875,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
                   <input
                     type="date"
                     value={documents.tacografo?.expiryDate || ''}
-                    onChange={(e) => handleDocumentChange('tacografo', 'expiryDate', e.target.value)}
+                    onChange={(e) => handleVehicleDocumentChange('tacografo', 'expiryDate', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -890,7 +890,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
                 </label>
                 <textarea
                   value={documents.tacografo?.observations || ''}
-                  onChange={(e) => handleDocumentChange('tacografo', 'observations', e.target.value)}
+                  onChange={(e) => handleVehicleDocumentChange('tacografo', 'observations', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   rows={2}
                   placeholder="Informações adicionais sobre o tacógrafo"
