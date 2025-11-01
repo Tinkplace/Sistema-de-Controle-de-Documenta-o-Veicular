@@ -70,14 +70,14 @@ const DriverForm: React.FC<DriverFormProps> = ({
     // ✨ MODIFICAÇÃO: Validação padrão das placas (obrigatórias mas sem avisos especiais)
     if (!formData.cavaloPlate.trim()) {
       newErrors.cavaloPlate = 'Placa do cavalo mecânico é obrigatória';
-    } else if (!/^[A-Z]{3}-\d{4}$/.test(formData.cavaloPlate.toUpperCase())) {
-      newErrors.cavaloPlate = 'Formato: ABC-1234';
+    } else if (!/^([A-Z]{3}-\d{4}|[A-Z]{3}\d[A-Z]\d{2})$/.test(formData.cavaloPlate.toUpperCase().replace(/-/g, ''))) {
+      newErrors.cavaloPlate = 'Formato: ABC-1234 ou ABC1A20';
     }
 
     if (!formData.carretaPlate.trim()) {
       newErrors.carretaPlate = 'Placa da carreta/reboque é obrigatória';
-    } else if (!/^[A-Z]{3}-\d{4}$/.test(formData.carretaPlate.toUpperCase())) {
-      newErrors.carretaPlate = 'Formato: ABC-1234';
+    } else if (!/^([A-Z]{3}-\d{4}|[A-Z]{3}\d[A-Z]\d{2})$/.test(formData.carretaPlate.toUpperCase().replace(/-/g, ''))) {
+      newErrors.carretaPlate = 'Formato: ABC-1234 ou ABC1A20';
     }
 
     // Validação CNH

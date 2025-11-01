@@ -100,8 +100,8 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
     // Validação dados básicos
     if (!formData.plate.trim()) {
       newErrors.plate = 'Placa é obrigatória';
-    } else if (!/^[A-Z]{3}-\d{4}$/.test(formData.plate.toUpperCase())) {
-      newErrors.plate = 'Formato: ABC-1234';
+    } else if (!/^([A-Z]{3}-\d{4}|[A-Z]{3}\d[A-Z]\d{2})$/.test(formData.plate.toUpperCase().replace(/-/g, ''))) {
+      newErrors.plate = 'Formato: ABC-1234 ou ABC1A20';
     }
 
     if (!formData.brand.trim()) {
